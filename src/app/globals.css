@@ -3,13 +3,15 @@
 @theme inline {
   --color-bg-primary: #0a1428;
   --color-bg-secondary: #0f1f3d;
-  --color-blue-main: #1e5fb5;
-  --color-blue-bright: #378ADD;
-  --color-blue-light: #85B7EB;
+  --color-blue-main: #1e3df5;
+  --color-blue-bright: #4A6FFF;
+  --color-blue-light: #8FA5FF;
+  --color-cad-electric: #004FFE;
   --color-cad-dark: #0a1428;
-  --color-cad-blue: #1e5fb5;
-  --color-cad-bright: #378ADD;
-  --color-cad-light: #85B7EB;
+  --color-cad-mid: #0f1f3d;
+  --color-cad-blue: #1e3df5;
+  --color-cad-bright: #4A6FFF;
+  --color-cad-light: #8FA5FF;
   --color-foreground: #ffffff;
   --color-muted: #94a3b8;
   --font-sans: var(--font-geist-sans);
@@ -63,4 +65,17 @@ body {
 
 .animate-pulse-dot {
   animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }

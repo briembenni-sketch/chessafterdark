@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { episodes } from "@/data/episodes";
 import { Music, Apple, MonitorPlay, Tv, Play, Calendar, Clock, ArrowRight } from "lucide-react";
 
@@ -24,62 +25,81 @@ export default function Home() {
 
   return (
     <>
-      {/* Hero Section */}
+      {/* Hero Section — Split Layout */}
       <section
         className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden"
         style={{
-          background: "radial-gradient(ellipse at top, #1e5fb5, #0f1f3d 40%, #0a1428)",
+          background: "radial-gradient(ellipse at 30% 20%, rgba(0,79,254,0.15), #0a1428 60%)",
         }}
       >
         {/* Decorative blurred circles */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-cad-bright/10 rounded-full blur-[100px]" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-cad-blue/8 rounded-full blur-[120px]" />
-        <div className="absolute top-40 right-1/4 w-48 h-48 bg-cad-light/5 rounded-full blur-[80px]" />
 
-        <div className="relative max-w-6xl mx-auto px-4 text-center">
-          {/* Live pill badge */}
-          <div className="animate-fade-in-up inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 mb-6">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse-dot" />
-            <span className="text-white/80 text-xs tracking-widest uppercase font-medium">
-              Í beinni á fimmtudagskvöldum
-            </span>
-          </div>
+        <div className="relative max-w-6xl mx-auto px-4">
+          <div className="flex flex-col-reverse md:flex-row items-center gap-10 md:gap-16">
+            {/* Left: Text */}
+            <div className="flex-1 text-center md:text-left">
+              {/* Live pill badge */}
+              <div className="animate-fade-in-up inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 mb-6">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse-dot" />
+                <span className="text-white/80 text-xs tracking-widest uppercase font-medium">
+                  Í beinni á fimmtudagskvöldum
+                </span>
+              </div>
 
-          {/* Tagline */}
-          <p className="animate-fade-in-up-delay-1 text-cad-light text-xs md:text-sm tracking-[0.3em] uppercase mb-4">
-            Traust · Heiðarleiki · Gagnsæi
-          </p>
+              {/* Title */}
+              <h1 className="animate-fade-in-up-delay-1 text-5xl md:text-7xl font-medium text-white mb-4">
+                Chess After Dark
+              </h1>
 
-          {/* Title */}
-          <h1 className="animate-fade-in-up-delay-2 text-5xl md:text-7xl font-medium text-white mb-6">
-            Chess After Dark
-          </h1>
+              {/* Subtitle */}
+              <p className="animate-fade-in-up-delay-2 text-cad-light text-xs md:text-sm tracking-[0.3em] uppercase mb-4">
+                EKKERT BORÐFAST
+              </p>
 
-          {/* Subtitle */}
-          <p className="animate-fade-in-up-delay-2 text-muted text-lg md:text-xl max-w-2xl mx-auto mb-8">
-            Hlaðvarp um knattspyrnu, fjármál, pólitík og margt fleira —
-            með Birki Karl og Leifi.
-          </p>
+              {/* Description */}
+              <p className="animate-fade-in-up-delay-2 text-muted text-lg md:text-xl max-w-lg mb-8">
+                Hlaðvarp um knattspyrnu, fjármál, pólitík og margt fleira
+              </p>
 
-          {/* CTAs */}
-          <div className="animate-fade-in-up-delay-3 flex flex-wrap justify-center gap-4 mb-12">
-            <Link
-              href={`/thaettir/${latestEpisode.slug}`}
-              className="inline-flex items-center gap-2 bg-cad-bright hover:bg-cad-light text-white px-6 py-3 rounded-xl transition-colors font-medium"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              Nýjasti þáttur
-            </Link>
-            <Link
-              href="/thaettir"
-              className="inline-flex items-center gap-2 border border-white/20 hover:border-white/40 text-white/80 hover:text-white px-6 py-3 rounded-xl transition-colors"
-            >
-              Allir þættir
-            </Link>
+              {/* CTAs */}
+              <div className="animate-fade-in-up-delay-3 flex flex-wrap justify-center md:justify-start gap-4">
+                <Link
+                  href={`/thaettir/${latestEpisode.slug}`}
+                  className="inline-flex items-center gap-2 bg-cad-electric hover:bg-cad-bright text-white px-6 py-3 rounded-xl transition-colors font-medium"
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  Hlusta á nýjasta þátt
+                </Link>
+                <Link
+                  href="/thaettir"
+                  className="inline-flex items-center gap-2 border border-white/20 hover:border-white/40 text-white/80 hover:text-white px-6 py-3 rounded-xl transition-colors"
+                >
+                  Allir þættir
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: Cover Art */}
+            <div className="flex-1 flex justify-center md:justify-end">
+              <div className="relative">
+                {/* Blue glow behind image */}
+                <div className="absolute inset-0 bg-cad-electric/30 rounded-3xl blur-[60px] scale-90" />
+                <Image
+                  src="/images/brand/cover-art.png"
+                  alt="Chess After Dark cover art"
+                  width={480}
+                  height={480}
+                  className="relative rounded-2xl animate-float w-72 md:w-96"
+                  priority
+                />
+              </div>
+            </div>
           </div>
 
           {/* Stats bar */}
-          <div className="animate-fade-in-up-delay-4 flex flex-wrap justify-center items-center gap-6 md:gap-0 text-white/60 text-sm">
+          <div className="animate-fade-in-up-delay-4 flex flex-wrap justify-center md:justify-start items-center gap-6 md:gap-0 text-white/60 text-sm mt-12">
             <span className="font-semibold text-white">347+</span>
             <span className="ml-1">þættir</span>
             <span className="hidden md:inline mx-6 text-white/20">|</span>
@@ -93,26 +113,32 @@ export default function Home() {
       </section>
 
       {/* Nýjasti þáttur Section */}
-      <section className="bg-[#0f1f3d] py-16">
+      <section className="bg-cad-mid py-16">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-1 h-6 bg-cad-bright rounded-full" />
+            <div className="w-1 h-6 bg-cad-electric rounded-full" />
             <span className="text-xs font-semibold tracking-widest uppercase text-white/70">
               Nýjasti þáttur
             </span>
           </div>
 
-          <div className="bg-gradient-to-r from-cad-bright/20 to-transparent p-px rounded-2xl">
-            <div className="bg-[#0a1428] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6">
+          <div className="bg-gradient-to-r from-cad-electric/20 to-transparent p-px rounded-2xl">
+            <div className="bg-cad-dark rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6">
               {/* Thumbnail */}
               <div className="md:w-64 shrink-0">
-                <div className="aspect-square rounded-xl bg-gradient-to-br from-cad-blue to-[#0a1428] relative overflow-hidden">
+                <div className="aspect-square rounded-xl overflow-hidden relative">
+                  <Image
+                    src={latestEpisode.thumbnail || "/images/brand/cover-art.png"}
+                    alt={latestEpisode.title}
+                    fill
+                    className="object-cover object-center"
+                  />
                   <span className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg font-medium">
                     #{latestEpisode.episodeNumber}
                   </span>
                   <Link
                     href={`/thaettir/${latestEpisode.slug}`}
-                    className="absolute bottom-3 right-3 w-12 h-12 bg-cad-bright hover:bg-cad-light rounded-full flex items-center justify-center transition-colors"
+                    className="absolute bottom-3 right-3 w-12 h-12 bg-cad-electric hover:bg-cad-bright rounded-full flex items-center justify-center transition-colors"
                   >
                     <Play className="w-5 h-5 text-white fill-current ml-0.5" />
                   </Link>
@@ -149,7 +175,7 @@ export default function Home() {
       </section>
 
       {/* Platform Links */}
-      <section className="bg-[#0f1f3d] pb-16">
+      <section className="bg-cad-mid pb-16">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-3">
             {[
@@ -174,10 +200,10 @@ export default function Home() {
       </section>
 
       {/* Flokkar Section */}
-      <section className="bg-[#0a1428] py-16">
+      <section className="bg-cad-dark py-16">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-1 h-6 bg-cad-bright rounded-full" />
+            <div className="w-1 h-6 bg-cad-electric rounded-full" />
             <span className="text-xs font-semibold tracking-widest uppercase text-white/70">
               Flokkar
             </span>
@@ -190,7 +216,7 @@ export default function Home() {
             {categories.map((cat) => (
               <div
                 key={cat.name}
-                className="bg-cad-bright/10 border border-cad-bright/30 hover:bg-cad-bright/20 rounded-2xl p-5 transition-colors cursor-pointer group"
+                className="bg-cad-electric/10 border border-cad-electric/30 hover:bg-cad-electric/20 rounded-2xl p-5 transition-colors cursor-pointer group"
               >
                 <span className="text-3xl mb-3 block">{cat.emoji}</span>
                 <h3 className="text-white font-semibold mb-1">{cat.name}</h3>
@@ -202,10 +228,10 @@ export default function Home() {
       </section>
 
       {/* Nýlegir þættir */}
-      <section className="bg-[#0f1f3d] py-16">
+      <section className="bg-cad-mid py-16">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-1 h-6 bg-cad-bright rounded-full" />
+            <div className="w-1 h-6 bg-cad-electric rounded-full" />
             <span className="text-xs font-semibold tracking-widest uppercase text-white/70">
               Nýlegir þættir
             </span>
@@ -216,16 +242,22 @@ export default function Home() {
               <Link
                 key={ep.slug}
                 href={`/thaettir/${ep.slug}`}
-                className="group border border-white/10 hover:border-cad-bright rounded-2xl overflow-hidden transition-all hover:scale-[1.02]"
+                className="group border border-white/10 hover:border-cad-electric rounded-2xl overflow-hidden transition-all hover:scale-[1.02]"
               >
-                {/* Thumbnail */}
-                <div className={`aspect-video bg-gradient-to-br ${cardGradients[idx % cardGradients.length]} relative`}>
+                {/* Thumbnail with fallback */}
+                <div className={`aspect-video relative overflow-hidden bg-gradient-to-br ${cardGradients[idx % cardGradients.length]}`}>
+                  <Image
+                    src={ep.thumbnail || "/images/brand/cover-art.png"}
+                    alt={ep.title}
+                    fill
+                    className="object-cover object-center"
+                  />
                   <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-lg font-medium">
                     #{ep.episodeNumber} · 1:42:10
                   </div>
                 </div>
 
-                <div className="p-5 bg-[#0a1428]">
+                <div className="p-5 bg-cad-dark">
                   {ep.topics.length > 0 && (
                     <span className="text-cad-light text-xs font-semibold tracking-widest uppercase">
                       {ep.topics[0]}
@@ -247,26 +279,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Hýslarnir Teaser */}
-      <section className="bg-[#0a1428] py-16">
+      {/* Hýslarnir Section */}
+      <section className="bg-cad-dark py-16">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-1 h-6 bg-cad-bright rounded-full" />
+            <div className="w-1 h-6 bg-cad-electric rounded-full" />
             <span className="text-xs font-semibold tracking-widest uppercase text-white/70">
               Hýslarnir
             </span>
           </div>
 
+          {/* Centerpiece: both hosts image */}
+          <div className="flex justify-center mb-10">
+            <div className="relative w-full max-w-2xl">
+              <div className="absolute inset-0 bg-cad-electric/20 rounded-3xl blur-[40px]" />
+              <Image
+                src="/images/hosts/both-blue.png"
+                alt="Birkir Karl og Leifur Þorsteinsson"
+                width={800}
+                height={500}
+                className="relative rounded-2xl w-full object-cover object-center"
+                priority
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
-              { name: "Birkir Karl Sigurðsson", role: "Hýsill" },
-              { name: "Leifur Þorsteinsson", role: "Hýsill" },
+              { name: "Birkir Karl Sigurðsson", role: "Hýsill", image: "/images/hosts/birkir-blue.png" },
+              { name: "Leifur Þorsteinsson", role: "Hýsill", image: "/images/hosts/leifur-blue.png" },
             ].map((host) => (
               <div
                 key={host.name}
                 className="flex items-center gap-5 bg-white/5 border border-white/10 rounded-2xl p-6"
               >
-                <div className="w-20 h-20 shrink-0 rounded-full bg-gradient-to-br from-cad-bright to-cad-blue" />
+                <div className="w-20 h-20 shrink-0 rounded-full overflow-hidden relative">
+                  <Image
+                    src={host.image}
+                    alt={host.name}
+                    fill
+                    className="object-cover object-center"
+                  />
+                </div>
                 <div>
                   <h3 className="text-white font-semibold text-lg">{host.name}</h3>
                   <p className="text-muted text-sm mb-2">{host.role}</p>

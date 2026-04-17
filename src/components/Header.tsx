@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
 const navLinks = [
@@ -18,10 +19,14 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-cad-dark/85 backdrop-blur-md border-b border-white/[0.08]">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cad-bright to-cad-blue" />
-          <span className="text-sm font-semibold text-white tracking-widest uppercase">
-            Chess After Dark
-          </span>
+          <Image
+            src="/images/logos/cad-logo-white.png"
+            alt="Chess After Dark"
+            width={120}
+            height={32}
+            className="h-8 w-auto"
+            priority
+          />
         </Link>
 
         <nav className="hidden md:flex gap-6">

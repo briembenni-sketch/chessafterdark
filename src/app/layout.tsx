@@ -16,6 +16,10 @@ export const metadata: Metadata = {
   },
   description:
     "Chess After Dark er íslenskt skákhlaðvarp með Birki Karl Sigurðssyni og Leifi Þorsteinssyni. Traust · Heiðarleiki · Gagnsæi.",
+  icons: {
+    icon: "/images/logos/cad-logo-square-blue.png",
+    apple: "/images/logos/cad-logo-square-blue.png",
+  },
   openGraph: {
     type: "website",
     locale: "is_IS",
@@ -23,12 +27,21 @@ export const metadata: Metadata = {
     title: "Chess After Dark – Skákhlaðvarp",
     description:
       "Íslenskt skákhlaðvarp með Birki Karl og Leifi. Traust · Heiðarleiki · Gagnsæi.",
+    images: [
+      {
+        url: "/images/brand/cover-art.png",
+        width: 1200,
+        height: 630,
+        alt: "Chess After Dark",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Chess After Dark – Skákhlaðvarp",
     description:
       "Íslenskt skákhlaðvarp með Birki Karl og Leifi. Traust · Heiðarleiki · Gagnsæi.",
+    images: ["/images/brand/cover-art.png"],
   },
 };
 
