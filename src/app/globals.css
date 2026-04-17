@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg-primary: #0a1428;
+  --color-bg-secondary: #0f1f3d;
+  --color-blue-main: #1e5fb5;
+  --color-blue-bright: #378ADD;
+  --color-blue-light: #85B7EB;
+  --color-foreground: #ffffff;
+  --color-muted: #94a3b8;
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
