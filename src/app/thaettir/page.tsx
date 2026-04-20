@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import type { Episode } from "@/lib/rss";
 
 const TOPIC_FILTERS = ["Allir", "Knattspyrna", "Pólitík", "Viðskipti", "Skák", "Almennt"];
@@ -32,7 +33,31 @@ function formatTime(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+const categoryMap: Record<string, string> = {
+  knattspyrna: "Knattspyrna",
+  politik: "Pólitík",
+  vidskipti: "Viðskipti",
+  skak: "Skák",
+};
+
+const categorySlugMap: Record<string, string> = {
+  Knattspyrna: "knattspyrna",
+  "Pólitík": "politik",
+  "Viðskipti": "vidskipti",
+  "Skák": "skak",
+};
+
 export default function ThaettirPage() {
+  return (
+    <Suspense>
+      <ThaettirContent />
+    </Suspense>
+  );
+}
+
+function ThaettirContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [activeTopic, setActiveTopic] = useState("Allir");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -46,6 +71,14 @@ export default function ThaettirPage() {
   const [audioDuration, setAudioDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // Read ?flokkur= param on mount
+  useEffect(() => {
+    const flokkur = searchParams.get("flokkur");
+    if (flokkur && categoryMap[flokkur]) {
+      setActiveTopic(categoryMap[flokkur]);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const saved = localStorage.getItem("cad-view-mode");
@@ -215,7 +248,15 @@ export default function ThaettirPage() {
             {TOPIC_FILTERS.map((topic) => (
               <button
                 key={topic}
-                onClick={() => setActiveTopic(topic)}
+                onClick={() => {
+                  setActiveTopic(topic);
+                  const slug = categorySlugMap[topic];
+                  if (slug) {
+                    router.push(`/thaettir?flokkur=${slug}`, { scroll: false });
+                  } else {
+                    router.push("/thaettir", { scroll: false });
+                  }
+                }}
                 className={`px-3.5 py-[7px] rounded-full text-xs whitespace-nowrap transition-colors ${
                   activeTopic === topic
                     ? "bg-cad-electric text-white font-medium"

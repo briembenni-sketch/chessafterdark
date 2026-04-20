@@ -43,11 +43,11 @@ export default function Footer() {
 
           <div>
             <h4 className="text-white text-xs font-semibold tracking-widest uppercase mb-4">
-              Samband
+              Hafa samband
             </h4>
             <div className="flex flex-col gap-2 text-muted text-sm">
-              <a href="mailto:chessafterdark@gmail.com" className="hover:text-cad-light transition-colors">
-                chessafterdark@gmail.com
+              <a href="mailto:chessafterdark@chessafterdark.is" className="text-white/70 hover:text-cad-light transition-colors">
+                chessafterdark@chessafterdark.is
               </a>
               <p>Reykjavík, Ísland</p>
             </div>

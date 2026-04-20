@@ -9,7 +9,7 @@ const navLinks = [
   { href: "/thaettir", label: "Þættir" },
   { href: "/thattastjornendur", label: "Þáttastjórnendur" },
   { href: "/vidburdir", label: "Viðburðir" },
-  { href: "/samband", label: "Samband" },
+  { href: "/samband", label: "Hafa samband" },
 ];
 
 export default function Header() {

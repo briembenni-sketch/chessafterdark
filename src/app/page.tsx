@@ -31,10 +31,10 @@ export default async function Home() {
   }
 
   const categories = [
-    { emoji: "⚽", name: "Knattspyrna", count: topicCounts["Knattspyrna"] || 0 },
-    { emoji: "🏛️", name: "Pólitík", count: topicCounts["Pólitík"] || 0 },
-    { emoji: "💼", name: "Viðskipti", count: topicCounts["Viðskipti"] || 0 },
-    { emoji: "♟️", name: "Skák", count: topicCounts["Skák"] || 0 },
+    { emoji: "⚽", name: "Knattspyrna", slug: "knattspyrna", count: topicCounts["Knattspyrna"] || 0 },
+    { emoji: "🏛️", name: "Pólitík", slug: "politik", count: topicCounts["Pólitík"] || 0 },
+    { emoji: "💼", name: "Viðskipti", slug: "vidskipti", count: topicCounts["Viðskipti"] || 0 },
+    { emoji: "♟️", name: "Skák", slug: "skak", count: topicCounts["Skák"] || 0 },
   ];
 
   return (
@@ -154,14 +154,15 @@ export default async function Home() {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {categories.map((cat) => (
-              <div
+              <Link
                 key={cat.name}
-                className="bg-cad-electric/10 border border-cad-electric/30 hover:bg-cad-electric/20 hover:border-cad-electric/50 rounded-2xl p-5 transition-all duration-200 cursor-pointer group hover:-translate-y-1"
+                href={`/thaettir?flokkur=${cat.slug}`}
+                className="bg-cad-electric/10 border border-cad-electric/30 hover:bg-[rgba(0,79,254,0.15)] hover:border-[rgba(0,79,254,0.5)] rounded-2xl p-5 transition-all duration-300 group hover:-translate-y-[2px] focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:ring-offset-2 focus-visible:ring-offset-cad-dark focus-visible:outline-none"
               >
                 <span className="text-3xl mb-3 block">{cat.emoji}</span>
                 <h3 className="text-white font-medium mb-1">{cat.name}</h3>
                 <p className="text-white/50 text-sm">{cat.count} þættir</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
