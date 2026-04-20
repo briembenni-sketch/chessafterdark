@@ -36,15 +36,20 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+function cleanTitle(rawTitle: string): string {
+  return rawTitle.replace(/^#?\d+\s*[-–—.:]?\s*/, "").trim();
+}
+
 function parseGuest(title: string): string {
+  const cleaned = cleanTitle(title);
   const separators = [" – ", " — ", " - ", " með "];
   for (const sep of separators) {
-    const idx = title.indexOf(sep);
+    const idx = cleaned.indexOf(sep);
     if (idx !== -1) {
-      return title.substring(idx + sep.length).trim();
+      return cleaned.substring(idx + sep.length).trim();
     }
   }
-  return "";
+  return cleaned;
 }
 
 function stripHtml(html: string): string {
@@ -150,15 +155,19 @@ export async function fetchEpisodes(): Promise<Episode[]> {
         (item["itunes:duration"] as string | number) || "0"
       );
 
+      const cleaned = cleanTitle(title);
+      const plain = stripHtml(rawDesc);
+      const shortDesc = plain.length <= 100 ? plain : plain.substring(0, 100).trim() + "...";
+
       return {
         number: epNum,
         slug: slugify(title),
-        title,
+        title: cleaned,
         guest: parseGuest(title),
         date: formatDate(String(item.pubDate || "")),
         duration,
         description: desc,
-        shortDescription: desc.substring(0, 160),
+        shortDescription: shortDesc,
         audioUrl,
         image,
         topics: autoTagTopics(title, desc),
@@ -168,7 +177,8 @@ export async function fetchEpisodes(): Promise<Episode[]> {
             : item.guid) || ""
         ),
       };
-    });
+    })
+    .sort((a, b) => b.number - a.number);
   } catch (err) {
     console.error("RSS fetch error, using fallback:", err);
     // Fall back to static data

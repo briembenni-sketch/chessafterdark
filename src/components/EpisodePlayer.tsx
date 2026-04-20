@@ -15,7 +15,7 @@ export default function EpisodePlayer({ episode }: EpisodePlayerProps) {
           <audio
             controls
             src={episode.audioUrl}
-            className="w-full [&::-webkit-media-controls-panel]:bg-cad-mid [&::-webkit-media-controls-panel]:rounded-xl"
+            className="w-full styled-audio"
             preload="none"
           />
         </div>

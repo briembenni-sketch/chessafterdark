@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { fetchEpisodes } from "@/lib/rss";
 import EpisodePlayer from "@/components/EpisodePlayer";
 import { Calendar, Clock } from "lucide-react";
@@ -53,10 +54,21 @@ export default async function EpisodePage({ params }: PageProps) {
       </Link>
 
       <div className="mt-4">
-        <div className="flex items-center gap-3 mb-4">
-          <span className="bg-cad-blue/20 text-cad-bright text-sm font-bold px-3 py-1 rounded">
+        {/* Episode image */}
+        <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden mb-6">
+          <Image
+            src={episode.image}
+            alt={episode.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 448px"
+          />
+          <span className="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white text-sm px-3 py-1.5 rounded-lg font-medium">
             Þáttur #{episode.number}
           </span>
+        </div>
+
+        <div className="flex items-center gap-3 mb-4">
           <span className="text-muted flex items-center gap-1.5">
             <Calendar className="w-4 h-4" />
             {new Date(episode.date).toLocaleDateString("is-IS", {
