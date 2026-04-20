@@ -226,13 +226,13 @@ export default async function Home() {
         </div>
       </AnimatedSection>
 
-      {/* Hýslarnir Section */}
+      {/* Þáttastjórnendur Section */}
       <AnimatedSection className="bg-cad-dark py-20 md:py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-1 h-8 bg-cad-electric rounded-full" />
             <span className="text-xs font-medium tracking-[0.2em] uppercase text-white/60">
-              Hýslarnir
+              Þáttastjórnendur
             </span>
           </div>
 
@@ -253,8 +253,8 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
-              { name: "Birkir Karl Sigurðsson", role: "Hýsill", image: "/images/hosts/birkir-blue.png" },
-              { name: "Leifur Þorsteinsson", role: "Hýsill", image: "/images/hosts/leifur-blue.png" },
+              { name: "Birkir Karl Sigurðsson", role: "Þáttastjórnandi", image: "/images/hosts/birkir-blue.png" },
+              { name: "Leifur Þorsteinsson", role: "Þáttastjórnandi", image: "/images/hosts/leifur-blue.png" },
             ].map((host) => (
               <div
                 key={host.name}
@@ -272,7 +272,7 @@ export default async function Home() {
                   <h3 className="text-white font-medium text-lg">{host.name}</h3>
                   <p className="text-white/50 text-sm mb-2">{host.role}</p>
                   <Link
-                    href="/hyslarnir"
+                    href="/thattastjornendur"
                     className="text-cad-light text-sm hover:text-white transition-colors inline-flex items-center gap-1"
                   >
                     Lesa meira <ArrowRight className="w-3 h-3" />

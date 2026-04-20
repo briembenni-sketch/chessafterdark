@@ -7,7 +7,7 @@ import { useState } from "react";
 const navLinks = [
   { href: "/", label: "Forsíða" },
   { href: "/thaettir", label: "Þættir" },
-  { href: "/hyslarnir", label: "Hýslarnir" },
+  { href: "/thattastjornendur", label: "Þáttastjórnendur" },
   { href: "/vidburdir", label: "Viðburðir" },
   { href: "/samband", label: "Samband" },
 ];

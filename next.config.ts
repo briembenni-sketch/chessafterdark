@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/hyslarnir",
+        destination: "/thattastjornendur",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
