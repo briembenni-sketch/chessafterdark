@@ -17,7 +17,7 @@ export default function Footer() {
               />
             </div>
             <p className="text-muted text-sm leading-relaxed max-w-sm mb-3">
-              Hlaðvarp um knattspyrnu, fjármál, pólitík og margt fleira — með Birki Karl og Leifi.
+              Hlaðvarp um knattspyrnu, fjármál, pólitík og margt fleira.
             </p>
             <p className="text-cad-light text-xs tracking-widest uppercase">
               Traust · Heiðarleiki · Gagnsæi

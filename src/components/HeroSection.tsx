@@ -88,23 +88,12 @@ export default function HeroSection({
 
           {/* Left column — text content */}
           <div className="text-center lg:text-left order-last lg:order-first">
-            {/* Small label */}
-            <motion.p
-              className="text-cad-light text-[11px] tracking-[0.2em] uppercase mb-6 font-medium"
-              variants={fadeInUp}
-              initial="hidden"
-              animate="visible"
-              custom={0}
-            >
-              ▼ NÝR ÞÁTTUR Á FIMMTUDÖGUM
-            </motion.p>
-
             {/* Logo image */}
             <motion.div
               variants={fadeInUp}
               initial="hidden"
               animate="visible"
-              custom={0.1}
+              custom={0}
               className="mb-4"
             >
               <Image
@@ -137,8 +126,7 @@ export default function HeroSection({
               animate="visible"
               custom={0.3}
             >
-              Hlaðvarp um knattspyrnu, fjármál, pólitík og margt fleira — með
-              Birki Karl og Leifi.
+              Hlaðvarp um knattspyrnu, fjármál, pólitík og margt fleira.
             </motion.p>
 
             {/* CTAs */}
