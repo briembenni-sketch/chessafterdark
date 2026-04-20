@@ -1,14 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { episodes } from "@/data/episodes";
+import { fetchEpisodes } from "@/lib/rss";
 import { Music, Apple, MonitorPlay, Tv, Play, Calendar, Clock, ArrowRight } from "lucide-react";
 
-const categories = [
-  { emoji: "⚽", name: "Knattspyrna", count: 124 },
-  { emoji: "🏛️", name: "Pólitík", count: 89 },
-  { emoji: "💼", name: "Viðskipti", count: 76 },
-  { emoji: "♟️", name: "Skák", count: 58 },
-];
+export const revalidate = 3600;
 
 const cardGradients = [
   "from-[#1e5fb5] to-[#0f2a5c]",
@@ -19,9 +14,25 @@ const cardGradients = [
   "from-[#1d5aad] to-[#0e2550]",
 ];
 
-export default function Home() {
+export default async function Home() {
+  const episodes = await fetchEpisodes();
   const latestEpisode = episodes[0];
   const recentEpisodes = episodes.slice(0, 6);
+
+  // Build category counts from topics
+  const topicCounts: Record<string, number> = {};
+  for (const ep of episodes) {
+    for (const t of ep.topics) {
+      topicCounts[t] = (topicCounts[t] || 0) + 1;
+    }
+  }
+
+  const categories = [
+    { emoji: "⚽", name: "Knattspyrna", count: topicCounts["Knattspyrna"] || 0 },
+    { emoji: "🏛️", name: "Pólitík", count: topicCounts["Pólitík"] || 0 },
+    { emoji: "💼", name: "Viðskipti", count: topicCounts["Viðskipti"] || 0 },
+    { emoji: "♟️", name: "Skák", count: topicCounts["Skák"] || 0 },
+  ];
 
   return (
     <>
@@ -100,7 +111,7 @@ export default function Home() {
 
           {/* Stats bar */}
           <div className="animate-fade-in-up-delay-4 flex flex-wrap justify-center md:justify-start items-center gap-6 md:gap-0 text-white/60 text-sm mt-12">
-            <span className="font-semibold text-white">347+</span>
+            <span className="font-semibold text-white">{episodes.length}+</span>
             <span className="ml-1">þættir</span>
             <span className="hidden md:inline mx-6 text-white/20">|</span>
             <span className="font-semibold text-white">5M+</span>
@@ -128,13 +139,13 @@ export default function Home() {
               <div className="md:w-64 shrink-0">
                 <div className="aspect-square rounded-xl overflow-hidden relative">
                   <Image
-                    src={latestEpisode.thumbnail || "/images/brand/cover-art.png"}
+                    src={latestEpisode.image}
                     alt={latestEpisode.title}
                     fill
                     className="object-cover object-center"
                   />
                   <span className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg font-medium">
-                    #{latestEpisode.episodeNumber}
+                    #{latestEpisode.number}
                   </span>
                   <Link
                     href={`/thaettir/${latestEpisode.slug}`}
@@ -156,16 +167,20 @@ export default function Home() {
                   {latestEpisode.title}
                 </h2>
                 <p className="text-muted text-sm leading-relaxed mb-4">
-                  {latestEpisode.description}
+                  {latestEpisode.shortDescription}
                 </p>
                 <div className="flex items-center gap-4 text-muted text-sm">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-4 h-4" />
-                    {latestEpisode.date}
+                    {new Date(latestEpisode.date).toLocaleDateString("is-IS", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Clock className="w-4 h-4" />
-                    1:22:45
+                    {latestEpisode.duration}
                   </span>
                 </div>
               </div>
@@ -179,9 +194,9 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-3">
             {[
-              { name: "Spotify", icon: Music, href: "https://open.spotify.com" },
-              { name: "Apple Podcasts", icon: Apple, href: "https://podcasts.apple.com" },
-              { name: "YouTube", icon: MonitorPlay, href: "https://youtube.com" },
+              { name: "Spotify", icon: Music, href: "https://open.spotify.com/show/1k1Ak6f8wFba3DzJzrNLTO" },
+              { name: "Apple Podcasts", icon: Apple, href: "https://podcasts.apple.com/is/podcast/chess-after-dark/id1592499624" },
+              { name: "YouTube", icon: MonitorPlay, href: "https://www.youtube.com/@chessafterdark7953" },
               { name: "Twitch", icon: Tv, href: "https://twitch.tv" },
             ].map((platform) => (
               <a
@@ -247,13 +262,13 @@ export default function Home() {
                 {/* Thumbnail with fallback */}
                 <div className={`aspect-video relative overflow-hidden bg-gradient-to-br ${cardGradients[idx % cardGradients.length]}`}>
                   <Image
-                    src={ep.thumbnail || "/images/brand/cover-art.png"}
+                    src={ep.image}
                     alt={ep.title}
                     fill
                     className="object-cover object-center"
                   />
                   <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-lg font-medium">
-                    #{ep.episodeNumber} · 1:42:10
+                    #{ep.number} · {ep.duration}
                   </div>
                 </div>
 
@@ -266,10 +281,10 @@ export default function Home() {
                   <h3 className="text-white font-semibold mt-1 mb-2 group-hover:text-cad-light transition-colors">
                     {ep.title}
                   </h3>
-                  <p className="text-muted text-sm line-clamp-2">{ep.description}</p>
-                  {ep.guests.length > 0 && (
+                  <p className="text-muted text-sm line-clamp-2">{ep.shortDescription}</p>
+                  {ep.guest && (
                     <p className="text-cad-light text-xs mt-3">
-                      Gestur: {ep.guests.join(", ")}
+                      Gestur: {ep.guest}
                     </p>
                   )}
                 </div>

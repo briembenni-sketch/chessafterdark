@@ -1,20 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { episodes } from "@/data/episodes";
+import { useState, useEffect } from "react";
+import type { Episode } from "@/lib/rss";
+
+const TOPIC_FILTERS = ["Allir", "Knattspyrna", "Pólitík", "Viðskipti", "Skák"];
 
 export default function ThaettirPage() {
   const [search, setSearch] = useState("");
+  const [activeTopic, setActiveTopic] = useState("Allir");
+  const [episodes, setEpisodes] = useState<Episode[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/episodes")
+      .then((res) => res.json())
+      .then((data) => {
+        setEpisodes(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   const filtered = episodes.filter((ep) => {
     const q = search.toLowerCase();
-    return (
+    const matchesSearch =
+      !q ||
       ep.title.toLowerCase().includes(q) ||
       ep.description.toLowerCase().includes(q) ||
-      ep.guests.some((g) => g.toLowerCase().includes(q)) ||
-      ep.topics.some((t) => t.toLowerCase().includes(q))
-    );
+      ep.guest.toLowerCase().includes(q) ||
+      ep.topics.some((t) => t.toLowerCase().includes(q));
+    const matchesTopic =
+      activeTopic === "Allir" || ep.topics.includes(activeTopic);
+    return matchesSearch && matchesTopic;
   });
 
   return (
@@ -24,6 +42,23 @@ export default function ThaettirPage() {
         Skoðaðu alla þætti Chess After Dark hér að neðan.
       </p>
 
+      {/* Topic filter chips */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {TOPIC_FILTERS.map((topic) => (
+          <button
+            key={topic}
+            onClick={() => setActiveTopic(topic)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              activeTopic === topic
+                ? "bg-cad-electric text-white"
+                : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10"
+            }`}
+          >
+            {topic}
+          </button>
+        ))}
+      </div>
+
       {/* Search */}
       <div className="mb-8">
         <input
@@ -31,39 +66,50 @@ export default function ThaettirPage() {
           placeholder="Leita í þáttum..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-md bg-bg-secondary border border-blue-main/30 rounded-lg px-4 py-3 text-white placeholder:text-muted focus:outline-none focus:border-blue-bright transition-colors"
+          className="w-full max-w-md bg-cad-mid border border-cad-blue/30 rounded-lg px-4 py-3 text-white placeholder:text-muted focus:outline-none focus:border-cad-bright transition-colors"
         />
       </div>
+
+      {loading && (
+        <p className="text-muted text-center py-12">Hleð þáttum...</p>
+      )}
 
       {/* Episodes list */}
       <div className="flex flex-col gap-4">
         {filtered.map((ep) => (
           <Link
-            key={ep.slug}
+            key={ep.guid}
             href={`/thaettir/${ep.slug}`}
-            className="bg-bg-secondary border border-blue-main/20 rounded-xl p-5 hover:border-blue-bright/50 transition-colors group flex flex-col md:flex-row gap-4"
+            className="bg-cad-mid border border-cad-blue/20 rounded-xl p-5 hover:border-cad-bright/50 transition-colors group flex flex-col md:flex-row gap-4"
           >
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <span className="bg-blue-main/20 text-blue-bright text-xs font-bold px-2 py-1 rounded">
-                  #{ep.episodeNumber}
+                <span className="bg-cad-blue/20 text-cad-bright text-xs font-bold px-2 py-1 rounded">
+                  #{ep.number}
                 </span>
-                <span className="text-muted text-sm">{ep.date}</span>
-                {ep.guests.length > 0 && (
-                  <span className="text-blue-light text-sm">
-                    Gestur: {ep.guests.join(", ")}
+                <span className="text-muted text-sm">
+                  {new Date(ep.date).toLocaleDateString("is-IS", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+                <span className="text-muted text-sm">{ep.duration}</span>
+                {ep.guest && (
+                  <span className="text-cad-light text-sm">
+                    Gestur: {ep.guest}
                   </span>
                 )}
               </div>
-              <h2 className="text-xl font-semibold text-white group-hover:text-blue-light transition-colors mb-2">
+              <h2 className="text-xl font-semibold text-white group-hover:text-cad-light transition-colors mb-2">
                 {ep.title}
               </h2>
-              <p className="text-muted text-sm">{ep.description}</p>
+              <p className="text-muted text-sm">{ep.shortDescription}</p>
               <div className="flex flex-wrap gap-2 mt-3">
                 {ep.topics.map((topic) => (
                   <span
                     key={topic}
-                    className="bg-blue-main/10 text-blue-light text-xs px-2 py-1 rounded"
+                    className="bg-cad-blue/10 text-cad-light text-xs px-2 py-1 rounded"
                   >
                     {topic}
                   </span>
@@ -71,25 +117,25 @@ export default function ThaettirPage() {
               </div>
             </div>
 
-            {/* Spotify embed placeholder */}
-            <div className="md:w-80 flex-shrink-0">
-              <iframe
-                src={`https://open.spotify.com/embed/episode/${ep.spotifyEmbedId}?theme=0`}
-                width="100%"
-                height="152"
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy"
-                className="rounded-lg"
-                title={`Spotify player - ${ep.title}`}
-              />
-            </div>
+            {/* Native audio player preview */}
+            {ep.audioUrl && (
+              <div className="md:w-80 flex-shrink-0 flex items-center">
+                <audio
+                  controls
+                  src={ep.audioUrl}
+                  className="w-full"
+                  preload="none"
+                  onClick={(e) => e.preventDefault()}
+                />
+              </div>
+            )}
           </Link>
         ))}
       </div>
 
-      {filtered.length === 0 && (
+      {!loading && filtered.length === 0 && (
         <p className="text-muted text-center py-12">
-          Enginn þáttur fannst fyrir &ldquo;{search}&rdquo;
+          Enginn þáttur fannst{search ? ` fyrir "${search}"` : ""}
         </p>
       )}
     </div>
