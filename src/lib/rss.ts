@@ -121,10 +121,16 @@ export async function fetchEpisodes(): Promise<Episode[]> {
       attributeNamePrefix: "@_",
     });
     const feed = parser.parse(xml);
-    const items = feed?.rss?.channel?.item;
+    const channel = feed?.rss?.channel;
+    const items = channel?.item;
     if (!items) throw new Error("No items in feed");
 
     const itemArray = Array.isArray(items) ? items : [items];
+
+    // Channel-level image fallback
+    const channelItunesImage = channel?.["itunes:image"]?.["@_href"] || "";
+    const channelImage = channel?.image?.url || "";
+    const fallbackImage = channelItunesImage || channelImage || "/images/brand/cover-art.png";
 
     return itemArray.map((item: Record<string, unknown>, idx: number) => {
       const title = String(item.title || "");
@@ -138,7 +144,7 @@ export async function fetchEpisodes(): Promise<Episode[]> {
       const audioUrl = enclosure?.["@_url"] || "";
 
       const itunesImage = item["itunes:image"] as Record<string, string> | undefined;
-      const image = itunesImage?.["@_href"] || "/images/brand/cover-art.png";
+      const image = itunesImage?.["@_href"] || fallbackImage;
 
       const duration = formatDuration(
         (item["itunes:duration"] as string | number) || "0"

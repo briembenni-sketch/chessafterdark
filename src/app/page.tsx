@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { fetchEpisodes } from "@/lib/rss";
 import { Music, Apple, MonitorPlay, Tv, Play, Calendar, Clock, ArrowRight } from "lucide-react";
+import EpisodeImage from "@/components/EpisodeImage";
 
 export const revalidate = 3600;
 
@@ -138,7 +139,7 @@ export default async function Home() {
               {/* Thumbnail */}
               <div className="md:w-64 shrink-0">
                 <div className="aspect-square rounded-xl overflow-hidden relative">
-                  <Image
+                  <EpisodeImage
                     src={latestEpisode.image}
                     alt={latestEpisode.title}
                     fill
@@ -261,7 +262,7 @@ export default async function Home() {
               >
                 {/* Thumbnail with fallback */}
                 <div className={`aspect-video relative overflow-hidden bg-gradient-to-br ${cardGradients[idx % cardGradients.length]}`}>
-                  <Image
+                  <EpisodeImage
                     src={ep.image}
                     alt={ep.title}
                     fill
