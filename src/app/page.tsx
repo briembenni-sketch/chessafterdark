@@ -5,6 +5,7 @@ import { Music, Apple, MonitorPlay, Tv, Play, Calendar, Clock, ArrowRight } from
 import EpisodeImage from "@/components/EpisodeImage";
 import HeroSection from "@/components/HeroSection";
 import AnimatedSection from "@/components/AnimatedSection";
+import { events } from "@/data/events";
 
 export const revalidate = 3600;
 
@@ -37,15 +38,48 @@ export default async function Home() {
     { emoji: "♟️", name: "Skák", slug: "skak", count: topicCounts["Skák"] || 0 },
   ];
 
+  // Find upcoming event within 30 days
+  const now = new Date();
+  const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const upcomingEvent = events.find((e) => {
+    const eventDate = new Date(e.date);
+    return eventDate >= now && eventDate <= thirtyDaysFromNow;
+  });
+
   return (
     <>
-      {/* Hero Section */}
+      {/* 1. Hero Section */}
       <HeroSection
         latestEpisodeSlug={latestEpisode.slug}
         episodeCount={episodes.length}
       />
 
-      {/* Nýjasti þáttur Section */}
+      {/* 2. Platform Strip */}
+      <section className="py-10" style={{ backgroundColor: "#0f1f3d" }}>
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="flex flex-wrap justify-center gap-3">
+            {[
+              { name: "Spotify", icon: Music, href: "https://open.spotify.com/show/1k1Ak6f8wFba3DzJzrNLTO" },
+              { name: "Apple Podcasts", icon: Apple, href: "https://podcasts.apple.com/is/podcast/chess-after-dark/id1592499624" },
+              { name: "YouTube", icon: MonitorPlay, href: "https://www.youtube.com/@chessafterdark7953" },
+              { name: "Twitch", icon: Tv, href: "https://twitch.tv" },
+            ].map((platform) => (
+              <a
+                key={platform.name}
+                href={platform.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-5 py-2.5 rounded-full transition-all text-sm hover:scale-[1.02]"
+              >
+                <platform.icon className="w-4 h-4" />
+                {platform.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Featured Episode (Nýjasti þáttur) */}
       <AnimatedSection className="bg-cad-mid py-20 md:py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-2">
@@ -114,32 +148,7 @@ export default async function Home() {
         </div>
       </AnimatedSection>
 
-      {/* Platform Links */}
-      <section className="bg-cad-mid pb-16">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-3">
-            {[
-              { name: "Spotify", icon: Music, href: "https://open.spotify.com/show/1k1Ak6f8wFba3DzJzrNLTO" },
-              { name: "Apple Podcasts", icon: Apple, href: "https://podcasts.apple.com/is/podcast/chess-after-dark/id1592499624" },
-              { name: "YouTube", icon: MonitorPlay, href: "https://www.youtube.com/@chessafterdark7953" },
-              { name: "Twitch", icon: Tv, href: "https://twitch.tv" },
-            ].map((platform) => (
-              <a
-                key={platform.name}
-                href={platform.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-5 py-2.5 rounded-full transition-all text-sm hover:scale-[1.02]"
-              >
-                <platform.icon className="w-4 h-4" />
-                {platform.name}
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Flokkar Section */}
+      {/* 4. Categories (Flokkar) */}
       <AnimatedSection className="bg-cad-dark py-20 md:py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-2">
@@ -168,7 +177,7 @@ export default async function Home() {
         </div>
       </AnimatedSection>
 
-      {/* Nýlegir þættir */}
+      {/* 5. Recent Episodes (Nýlegir þættir) */}
       <AnimatedSection className="bg-cad-mid py-20 md:py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-2">
@@ -227,7 +236,62 @@ export default async function Home() {
         </div>
       </AnimatedSection>
 
-      {/* Þáttastjórnendur Section */}
+      {/* 6. Upcoming Event Teaser (conditional) */}
+      {upcomingEvent && (
+        <AnimatedSection className="bg-cad-dark py-20 md:py-20">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-1 h-8 bg-cad-electric rounded-full" />
+              <span className="text-xs font-medium tracking-[0.2em] uppercase text-white/60">
+                Næsti viðburður
+              </span>
+            </div>
+
+            <Link
+              href={`/vidburdir`}
+              className="block bg-gradient-to-r from-cad-electric/20 to-transparent p-px rounded-2xl hover:from-cad-electric/30 transition-all"
+            >
+              <div className="bg-cad-dark rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-8">
+                <div className="flex-1">
+                  <span className="text-cad-light text-xs font-medium tracking-[0.2em] uppercase mb-3 block">
+                    {upcomingEvent.categoryLabel}
+                  </span>
+                  <h3 className="text-2xl md:text-3xl font-medium text-white mb-3">
+                    {upcomingEvent.title}
+                  </h3>
+                  <p className="text-white/70 text-sm leading-relaxed mb-4">
+                    {upcomingEvent.shortDescription}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-4 text-white/50 text-sm">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(upcomingEvent.date).toLocaleDateString("is-IS", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </span>
+                    {upcomingEvent.time && (
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-4 h-4" />
+                        {upcomingEvent.time}
+                      </span>
+                    )}
+                    <span>{upcomingEvent.location}</span>
+                  </div>
+                </div>
+                <div className="shrink-0">
+                  <span className="inline-flex items-center gap-2 bg-cad-electric hover:bg-cad-bright text-white px-6 py-3 rounded-[10px] font-medium transition-colors">
+                    Sjá nánar <ArrowRight className="w-4 h-4" />
+                  </span>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </AnimatedSection>
+      )}
+
+      {/* 7. Hosts Teaser (Þáttastjórnendur) */}
       <AnimatedSection className="bg-cad-dark py-20 md:py-20">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-8">
@@ -236,6 +300,10 @@ export default async function Home() {
               Þáttastjórnendur
             </span>
           </div>
+
+          <p className="text-white/70 text-lg max-w-2xl mb-10">
+            Frá 2019 hafa Birkir Karl og Leifur stjórnað umræðunni um knattspyrnu, pólitík, viðskipti og margt fleira.
+          </p>
 
           {/* Centerpiece: both hosts image */}
           <div className="flex justify-center mb-10">
@@ -284,6 +352,33 @@ export default async function Home() {
           </div>
         </div>
       </AnimatedSection>
+
+      {/* 8. Final CTA Band */}
+      <section className="bg-cad-electric py-16 md:py-20">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h3 className="text-3xl font-medium text-white mb-4">
+            Yfir {episodes.length} þættir bíða þín
+          </h3>
+          <p className="text-white/80 text-lg mb-8">
+            Hlaðvarps&shy;safnið er opið og frjálst. Byrjaðu að hlusta í dag.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/thaettir"
+              className="inline-flex items-center gap-2 bg-white text-cad-electric px-7 py-3.5 rounded-[10px] font-medium hover:bg-white/90 transition-colors hover:scale-[1.02]"
+            >
+              Skoða alla þætti
+            </Link>
+            <Link
+              href={`/thaettir/${latestEpisode.slug}`}
+              className="inline-flex items-center gap-2 border-2 border-white/40 hover:border-white text-white px-7 py-3.5 rounded-[10px] font-medium transition-all hover:scale-[1.02]"
+            >
+              <Play className="w-4 h-4 fill-current" />
+              Hlusta núna
+            </Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
