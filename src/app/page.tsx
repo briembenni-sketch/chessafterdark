@@ -355,27 +355,57 @@ export default async function Home() {
       </AnimatedSection>
 
       {/* 8. Final CTA Band */}
-      <section className="bg-cad-electric py-16 md:py-20">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h3 className="text-3xl font-medium text-white mb-4">
+      <section className="relative overflow-hidden py-20 px-6 border-t border-white/5">
+        {/* Subtle background gradient — not solid blue */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(0,79,254,0.15) 0%, transparent 60%)'
+          }}
+        />
+
+        {/* Decorative blurred blue orbs */}
+        <div
+          className="absolute top-[-100px] left-[10%] w-[400px] h-[400px] pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(0,79,254,0.25) 0%, transparent 70%)',
+            filter: 'blur(80px)'
+          }}
+        />
+        <div
+          className="absolute bottom-[-100px] right-[10%] w-[400px] h-[400px] pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(0,79,254,0.2) 0%, transparent 70%)',
+            filter: 'blur(80px)'
+          }}
+        />
+
+        {/* Content */}
+        <div className="relative max-w-[680px] mx-auto text-center z-10">
+          <div className="text-cad-light text-xs tracking-[0.3em] mb-4">
+            BYRJAÐU AÐ HLUSTA
+          </div>
+          <h3 className="text-4xl md:text-5xl font-medium mb-5 tracking-tight">
             Yfir {episodes.length} þættir bíða þín
           </h3>
-          <p className="text-white/80 text-lg mb-8">
-            Hlaðvarps&shy;safnið er opið og frjálst. Byrjaðu að hlusta í dag.
+          <p className="text-white/60 text-base mb-8 max-w-md mx-auto">
+            Hlaðvarpssafnið er opið og frjálst. Byrjaðu að hlusta í dag.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/thaettir"
-              className="inline-flex items-center gap-2 bg-white text-cad-electric px-7 py-3.5 rounded-[10px] font-medium hover:bg-white/90 transition-colors hover:scale-[1.02]"
-            >
-              Skoða alla þætti
-            </Link>
+          <div className="flex gap-3 justify-center flex-wrap">
             <Link
               href={`/thaettir/${latestEpisode.slug}`}
-              className="inline-flex items-center gap-2 border-2 border-white/40 hover:border-white text-white px-7 py-3.5 rounded-[10px] font-medium transition-all hover:scale-[1.02]"
+              className="bg-cad-electric hover:bg-cad-blue text-white px-6 py-3.5 rounded-xl text-sm font-medium transition-colors flex items-center gap-2.5 group"
             >
-              <Play className="w-4 h-4 fill-current" />
+              <span className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-cad-electric text-[10px] group-hover:scale-110 transition-transform">
+                ▶
+              </span>
               Hlusta núna
+            </Link>
+            <Link
+              href="/thaettir"
+              className="bg-white/5 hover:bg-white/10 border border-white/15 hover:border-white/25 text-white px-6 py-3.5 rounded-xl text-sm transition-all"
+            >
+              Skoða alla þætti
             </Link>
           </div>
         </div>
