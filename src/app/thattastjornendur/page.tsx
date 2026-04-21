@@ -13,14 +13,6 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
-function TwitterIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
-      <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
-    </svg>
-  );
-}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
@@ -33,24 +25,24 @@ const hosts = [
     label: "STJÓRNANDI 01",
     role: "STOFNANDI · ÞÁTTASTJÓRNANDI",
     image: "/images/hosts/birkir-blue.png",
-    bio: "Birkir Karl stýrir Chess After Dark ásamt Leifi og hefur verið driffjöður þáttarins frá upphafi. Ástríðumaður um knattspyrnu, pólitík og íslenska atvinnulífið.",
+    bio: "Birkir Karl er annar stofnandi Chess After Dark og hefur stýrt þættinum með Leifi frá 2019. Kópavogsbúi sem starfar í viðskiptalífinu og lifir og hrærist í umræðunni um pólitík, efnahagsmál og íslenska knattspyrnu. Birkir er þekktur fyrir óhræddar spurningar og að draga fram hliðar á gestum sem sjaldnast fást annars staðar.",
     stats: [
       { value: "327+", label: "þættir" },
       { value: "2019", label: "síðan" },
     ],
-    social: { instagram: "#", twitter: "#" },
+    social: { instagram: "https://www.instagram.com/chessafterdark/" },
   },
   {
     name: "Leifur Þorsteinsson",
     label: "STJÓRNANDI 02",
     role: "STOFNANDI · ÞÁTTASTJÓRNANDI",
     image: "/images/hosts/leifur-blue.png",
-    bio: "Leifur er stofnandi Chess After Dark ásamt Birki og áhugasamur skákmaður með um 1.700 Eló-stig. Þekktur fyrir beinskeyttan stíl og djúp samtöl við gesti.",
+    bio: "Leifur stofnaði Chess After Dark með Birki árið 2019. Hugmyndin var upphaflega myndhlaðvarp þar sem gestir tefldu á meðan þeir svöruðu spurningum, enda ekki á allra manna færi að tefla meðan þeir eru spurðir spjörunum úr. Í dag starfar Leifur sem viðskiptastjóri hjá CreditInfo.",
     stats: [
-      { value: "1.700", label: "ELO stig" },
-      { value: "♟", label: "skákmaður" },
+      { value: "327+", label: "þættir" },
+      { value: "2019", label: "síðan" },
     ],
-    social: { instagram: "#", twitter: "#" },
+    social: { instagram: "https://www.instagram.com/leifmeister13/" },
   },
 ];
 
@@ -143,15 +135,6 @@ export default function ThattastjornendurPage() {
                     className="w-9 h-9 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-colors"
                   >
                     <InstagramIcon className="w-4 h-4" />
-                  </a>
-                  <a
-                    href={host.social.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${host.name} á Twitter`}
-                    className="w-9 h-9 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-colors"
-                  >
-                    <TwitterIcon className="w-4 h-4" />
                   </a>
                   {/* Chess icon */}
                   <span
