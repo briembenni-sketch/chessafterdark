@@ -97,13 +97,12 @@ export default function HeroSection({
               className="mb-4"
             >
               <Image
-                src="/images/logos/cad-logo-blue.png"
+                src="/images/logos/cad-logo-white.png"
                 alt="Chess After Dark"
-                width={480}
-                height={120}
-                className="max-w-[480px] w-full lg:w-auto h-auto mx-auto lg:mx-0"
+                width={500}
+                height={180}
                 priority
-                style={{ maxWidth: "min(480px, 100%)" }}
+                className="h-auto w-full max-w-[320px] md:max-w-[460px] mb-5 mx-auto lg:mx-0"
               />
             </motion.div>
 
@@ -169,12 +168,14 @@ export default function HeroSection({
                 <span className="text-xs text-white/45 ml-1.5">þættir</span>
               </div>
               <div>
-                <span className="text-2xl font-medium text-white">5M+</span>
+                <span className="text-2xl font-medium text-white">2.5M+</span>
                 <span className="text-xs text-white/45 ml-1.5">spilanir</span>
               </div>
               <div>
-                <span className="text-2xl font-medium text-white">2019</span>
-                <span className="text-xs text-white/45 ml-1.5">síðan</span>
+                <span className="text-2xl font-medium text-white">1M+</span>
+                <span className="text-[11px] text-white/45 ml-1.5">
+                  hlustaðir klukkutímar
+                </span>
               </div>
             </motion.div>
           </div>
