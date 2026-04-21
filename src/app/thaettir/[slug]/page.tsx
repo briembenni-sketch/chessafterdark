@@ -87,13 +87,7 @@ export default async function EpisodePage({ params }: PageProps) {
           {episode.title}
         </h1>
 
-        {episode.guest && (
-          <p className="text-cad-light text-lg mb-4">
-            Gestur: {episode.guest}
-          </p>
-        )}
-
-        <p className="text-muted text-lg mb-8">{episode.description}</p>
+        <div className="whitespace-pre-line text-muted text-lg mb-8">{episode.description}</div>
 
         {/* Episode Player */}
         <div className="mb-8">

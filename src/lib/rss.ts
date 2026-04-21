@@ -52,17 +52,46 @@ function parseGuest(title: string): string {
   return cleaned;
 }
 
-function stripHtml(html: string): string {
+function htmlToText(html: string): string {
+  if (!html) return "";
+
   return html
-    .replace(/<[^>]*>/g, "")
+    // Normalize self-closing <br> variations
+    .replace(/<br\s*\/?>/gi, "\n")
+    // Block-level closing tags → double newline
+    .replace(/<\/(p|div|h[1-6]|li|ul|ol|blockquote)>/gi, "\n\n")
+    .replace(/<(p|div|h[1-6]|blockquote)[^>]*>/gi, "\n\n")
+    // List items → bullet-prefixed line
+    .replace(/<li[^>]*>/gi, "\n• ")
+    // Inline tags → space
+    .replace(/<\/?(a|span|em|strong|b|i|u)[^>]*>/gi, " ")
+    // Strip remaining tags
+    .replace(/<[^>]+>/g, " ")
+    // Decode common HTML entities
+    .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
+    .replace(/&\w+;/g, " ")
+    // Collapse spaces but preserve newlines
+    .replace(/[ \t]+/g, " ")
+    // Clean up excessive blank lines
+    .replace(/\n{3,}/g, "\n\n")
+    // Trim each line
+    .split("\n")
+    .map((line) => line.trim())
+    .join("\n")
     .trim();
+}
+
+function makeShortDescription(fullText: string, maxLength = 160): string {
+  const singleLine = fullText.replace(/\n+/g, " ").trim();
+  if (singleLine.length <= maxLength) return singleLine;
+  const cut = singleLine.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(" ");
+  return cut.slice(0, lastSpace > 100 ? lastSpace : maxLength) + "…";
 }
 
 function formatDuration(raw: string | number): string {
@@ -140,7 +169,7 @@ export async function fetchEpisodes(): Promise<Episode[]> {
     return itemArray.map((item: Record<string, unknown>, idx: number) => {
       const title = String(item.title || "");
       const rawDesc = String(item.description || "");
-      const desc = stripHtml(rawDesc);
+      const desc = htmlToText(rawDesc);
       const epNum =
         (item["itunes:episode"] as number) ||
         itemArray.length - idx;
@@ -156,8 +185,7 @@ export async function fetchEpisodes(): Promise<Episode[]> {
       );
 
       const cleaned = cleanTitle(title);
-      const plain = stripHtml(rawDesc);
-      const shortDesc = plain.length <= 100 ? plain : plain.substring(0, 100).trim() + "...";
+      const shortDesc = makeShortDescription(desc);
 
       return {
         number: epNum,
