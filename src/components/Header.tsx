@@ -1,75 +1,395 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Music, Headphones } from "lucide-react";
 
 const navLinks = [
-  { href: "/", label: "Forsíða" },
+  { href: "/", label: "Forsíða", exact: true },
   { href: "/thaettir", label: "Þættir" },
   { href: "/thattastjornendur", label: "Þáttastjórnendur" },
-  { href: "/vidburdir", label: "Viðburðir" },
-  { href: "/samband", label: "Hafa samband" },
+  { href: "/samband", label: "Hafa samband", exact: true },
 ];
 
-export default function Header() {
-  const [menuOpen, setMenuOpen] = useState(false);
+function YoutubeIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.3 31.3 0 0 0 0 12a31.3 31.3 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1c.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.5 15.6V8.4l6.3 3.6-6.3 3.6z" />
+    </svg>
+  );
+}
+
+function InstagramIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+const platformLinks = [
+  { href: "https://open.spotify.com", label: "Spotify", icon: Music },
+  { href: "https://podcasts.apple.com", label: "Apple Podcasts", icon: Headphones },
+  { href: "https://youtube.com", label: "YouTube", icon: YoutubeIcon },
+  { href: "https://instagram.com", label: "Instagram", icon: InstagramIcon },
+];
+
+function Logo({ small = false }: { small?: boolean }) {
+  const pillSize = small
+    ? "text-[10px] px-2 py-[3px]"
+    : "text-[12px] px-[10px] py-1";
+  const textSize = small ? "text-xs" : "text-sm";
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-cad-dark/85 backdrop-blur-md border-b border-white/[0.08]">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/images/logos/cad-logo-white.png"
-            alt="Chess After Dark"
-            width={120}
-            height={32}
-            className="h-8 w-auto"
-            priority
-          />
-        </Link>
+    <Link
+      href="/"
+      className="flex items-center gap-0 hover:opacity-90 transition-opacity"
+      aria-label="Chess After Dark — Forsíða"
+    >
+      <span
+        className={`bg-white text-cad-dark font-bold rounded-sm ${pillSize} tracking-[0.5px] leading-none`}
+      >
+        CHESS
+      </span>
+      <span
+        className={`font-bold text-white ${textSize} tracking-[0.5px] ml-2 leading-none`}
+      >
+        AFTER DARK
+      </span>
+    </Link>
+  );
+}
 
-        <nav className="hidden md:flex gap-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-white/55 hover:text-cad-light transition-colors text-sm"
+export default function Header() {
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  const handleEsc = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) setIsOpen(false);
+    },
+    [isOpen]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
+  }, [handleEsc]);
+
+  // Close menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  function isActive(href: string, exact?: boolean) {
+    if (exact) return pathname === href;
+    return pathname === href || pathname.startsWith(href + "/");
+  }
+
+  const showScrolled = mounted && scrolled;
+
+  return (
+    <>
+      {/* Skip to content */}
+      <a
+        href="#main-content"
+        className="fixed top-0 left-0 z-[60] bg-cad-electric text-white px-4 py-2 text-sm font-medium rounded-br-lg -translate-y-full focus:translate-y-0 transition-transform"
+      >
+        Fara í efni
+      </a>
+
+      {/* ── Desktop header ── */}
+      <header
+        className="hidden lg:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out"
+        style={
+          showScrolled
+            ? {
+                top: 16,
+                left: "50%",
+                right: "auto",
+                transform: "translateX(-50%)",
+                width: "calc(100% - 48px)",
+                maxWidth: 1200,
+                background: "rgba(10,20,40,0.75)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "0.5px solid rgba(255,255,255,0.08)",
+                borderRadius: 16,
+                padding: "14px 24px",
+                boxShadow: "0 4px 32px rgba(0,0,0,0.3)",
+              }
+            : {
+                top: 0,
+                left: 0,
+                right: 0,
+                transform: "none",
+                width: "100%",
+                maxWidth: "none",
+                background: "transparent",
+                backdropFilter: "none",
+                WebkitBackdropFilter: "none",
+                border: "none",
+                borderBottom: "0.5px solid rgba(255,255,255,0.05)",
+                borderRadius: 0,
+                padding: "18px 24px",
+                boxShadow: "none",
+              }
+        }
+      >
+        <div className="flex items-center justify-between max-w-[1200px] mx-auto">
+          {/* Left — Logo */}
+          <Logo />
+
+          {/* Center — Navigation */}
+          <nav className="flex items-center gap-1">
+            {navLinks.map((link) => {
+              const active = isActive(link.href, link.exact);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative px-3.5 py-2 rounded-lg text-[13px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:ring-offset-2 focus-visible:ring-offset-cad-dark ${
+                    active
+                      ? "bg-white/[0.08] text-white"
+                      : "text-white/60 hover:bg-white/[0.05] hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                  {active && (
+                    <span className="absolute bottom-[-2px] left-1/2 -translate-x-1/2 w-3.5 h-0.5 bg-cad-electric rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Right — CTA */}
+          <Link
+            href="/thaettir"
+            className={`inline-flex items-center gap-1.5 bg-cad-electric text-white rounded-[10px] text-[13px] font-medium hover:bg-cad-blue hover:-translate-y-px transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:ring-offset-2 focus-visible:ring-offset-cad-dark ${
+              showScrolled ? "px-4 py-2" : "px-[18px] py-[9px]"
+            }`}
+          >
+            <svg
+              viewBox="0 0 12 14"
+              fill="currentColor"
+              className="w-[10px] h-[12px]"
             >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+              <path d="M0 0v14l12-7z" />
+            </svg>
+            Hlusta
+          </Link>
+        </div>
+      </header>
 
-        <button
-          className="md:hidden text-white"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {menuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      {/* ── Mobile header ── */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[18px] py-3.5 bg-[rgba(10,20,40,0.9)] backdrop-blur-xl border-b border-white/[0.06]">
+        <Logo small />
+
+        <div className="flex items-center gap-2">
+          {/* Play button */}
+          <Link
+            href="/thaettir"
+            className="w-9 h-9 flex items-center justify-center bg-cad-electric rounded-lg text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:ring-offset-2 focus-visible:ring-offset-cad-dark"
+            aria-label="Hlusta á þætti"
+          >
+            <svg
+              viewBox="0 0 12 14"
+              fill="currentColor"
+              className="w-[10px] h-[12px]"
+            >
+              <path d="M0 0v14l12-7z" />
+            </svg>
+          </Link>
+
+          {/* Menu toggle */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:ring-offset-2 focus-visible:ring-offset-cad-dark ${
+              isOpen
+                ? "bg-cad-electric/15 border-cad-electric/40 text-white"
+                : "bg-white/[0.06] border-white/10 text-white"
+            }`}
+            aria-label={isOpen ? "Loka valmynd" : "Opna valmynd"}
+            aria-expanded={isOpen}
+          >
+            {isOpen ? (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              >
+                <path d="M1 1l12 12M1 13L13 1" />
+              </svg>
             ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <div className="flex flex-col gap-1">
+                <span className="block w-3.5 h-[1.5px] bg-white rounded-full" />
+                <span className="block w-3.5 h-[1.5px] bg-white rounded-full" />
+              </div>
             )}
-          </svg>
-        </button>
-      </div>
+          </button>
+        </div>
+      </header>
 
-      {menuOpen && (
-        <nav className="md:hidden border-t border-white/[0.08] px-4 py-3 flex flex-col gap-3 bg-cad-dark/95 backdrop-blur-md">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-white/55 hover:text-cad-light transition-colors"
-              onClick={() => setMenuOpen(false)}
+      {/* ── Mobile drawer ── */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            ref={drawerRef}
+            className="lg:hidden fixed inset-0 z-50 flex flex-col bg-[rgba(10,20,40,0.98)] backdrop-blur-[30px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            {/* Drawer header */}
+            <div className="flex items-center justify-between px-[18px] py-3.5 border-b border-white/[0.06]">
+              <Logo small />
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/thaettir"
+                  className="w-9 h-9 flex items-center justify-center bg-cad-electric rounded-lg text-white"
+                  aria-label="Hlusta á þætti"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <svg
+                    viewBox="0 0 12 14"
+                    fill="currentColor"
+                    className="w-[10px] h-[12px]"
+                  >
+                    <path d="M0 0v14l12-7z" />
+                  </svg>
+                </Link>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg bg-cad-electric/15 border border-cad-electric/40 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:ring-offset-2 focus-visible:ring-offset-cad-dark"
+                  aria-label="Loka valmynd"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  >
+                    <path d="M1 1l12 12M1 13L13 1" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Nav list */}
+            <nav className="px-5 py-5 flex flex-col gap-1">
+              {navLinks.map((link, i) => {
+                const active = isActive(link.href, link.exact);
+                return (
+                  <motion.div
+                    key={link.href}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.2 }}
+                  >
+                    <Link
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center justify-between px-4 py-3.5 rounded-xl text-[15px] transition-all duration-200 ${
+                        active
+                          ? "bg-cad-electric/[0.12] border border-cad-electric/30 text-white font-medium"
+                          : "text-white/75 hover:bg-white/[0.05] border border-transparent"
+                      }`}
+                      style={{
+                        WebkitTapHighlightColor: "transparent",
+                      }}
+                    >
+                      <span className="flex items-center gap-3">
+                        {link.label}
+                        {link.href === "/thaettir" && (
+                          <span className="text-white/30 text-xs">327</span>
+                        )}
+                      </span>
+                      {active && (
+                        <svg
+                          width="6"
+                          height="10"
+                          viewBox="0 0 6 10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-cad-light"
+                        >
+                          <path d="M1 1l4 4-4 4" />
+                        </svg>
+                      )}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </nav>
+
+            {/* Platform links */}
+            <motion.div
+              className="px-5 pt-5 border-t border-white/[0.08]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.2 }}
             >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-      )}
-    </header>
+              <p className="text-white/40 text-[10px] tracking-widest mb-2.5 uppercase">
+                Hlustaðu
+              </p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {platformLinks.map((p) => (
+                  <a
+                    key={p.label}
+                    href={p.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="aspect-square flex items-center justify-center bg-white/[0.04] border border-white/[0.08] rounded-lg text-white/70 hover:bg-white/[0.08] transition-colors"
+                    aria-label={p.label}
+                  >
+                    <p.icon size={14} />
+                  </a>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

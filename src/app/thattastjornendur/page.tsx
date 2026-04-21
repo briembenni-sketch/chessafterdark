@@ -56,7 +56,7 @@ const hosts = [
 
 export default function ThattastjornendurPage() {
   return (
-    <div className="pt-16">
+    <div>
       {/* SECTION 1: Hero */}
       <motion.section
         className="py-20 md:py-20 md:pb-15 px-5 md:px-8 text-center"
