@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { fetchEpisodes } from "@/lib/rss";
-import { Music, Apple, MonitorPlay, Tv, Play, Calendar, Clock, ArrowRight } from "lucide-react";
+import { Music, Apple, MonitorPlay, Tv, Play, Calendar, Clock, ArrowRight, Camera } from "lucide-react";
 import EpisodeImage from "@/components/EpisodeImage";
 import HeroSection from "@/components/HeroSection";
 import AnimatedSection from "@/components/AnimatedSection";
@@ -21,7 +21,7 @@ const cardGradients = [
 export default async function Home() {
   const episodes = await fetchEpisodes();
   const latestEpisode = episodes[0];
-  const recentEpisodes = episodes.slice(0, 6);
+  const recentEpisodes = episodes.slice(1, 7);
 
   // Build category counts from topics
   const topicCounts: Record<string, number> = {};
@@ -62,7 +62,8 @@ export default async function Home() {
               { name: "Spotify", icon: Music, href: "https://open.spotify.com/show/1k1Ak6f8wFba3DzJzrNLTO" },
               { name: "Apple Podcasts", icon: Apple, href: "https://podcasts.apple.com/is/podcast/chess-after-dark/id1592499624" },
               { name: "YouTube", icon: MonitorPlay, href: "https://www.youtube.com/@chessafterdark7953" },
-              { name: "Twitch", icon: Tv, href: "https://twitch.tv" },
+              { name: "Twitch", icon: Tv, href: "https://twitch.tv/chessafterdark" },
+              { name: "Instagram", icon: Camera, href: "https://www.instagram.com/chessafterdark/" },
             ].map((platform) => (
               <a
                 key={platform.name}
