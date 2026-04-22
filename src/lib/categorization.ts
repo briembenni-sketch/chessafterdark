@@ -1,150 +1,109 @@
 import overrides from "@/data/episode-overrides.json";
 
-export type Category = "vidtol" | "skakspjall" | "mot-frettir" | "serstakt";
-export type Tag =
+export type Category =
   | "knattspyrna"
   | "politik"
-  | "vidskipti"
   | "skak"
-  | "listir"
-  | "fjolmidlar"
-  | "visindi"
-  | "ithrottir"
-  | "saga"
-  | "taekni"
-  | "log"
-  | "heilsa";
+  | "vidskipti"
+  | "annad";
 
-export const CATEGORIES: Record<
-  Category,
-  { label: string; description: string; icon: string }
-> = {
-  vidtol: {
-    label: "Viðtöl",
-    description: "Gestaþættir",
-    icon: "Mic",
-  },
-  skakspjall: {
-    label: "Skákspjall",
-    description: "Hýslar ræða skák",
-    icon: "MessageSquare",
-  },
-  "mot-frettir": {
-    label: "Mót & Fréttir",
-    description: "Skákmót og fréttir",
-    icon: "Trophy",
-  },
-  serstakt: {
-    label: "Sérstakt",
-    description: "Jól, afmæli, live",
-    icon: "Sparkles",
-  },
+export const CATEGORIES: Record<Category, { label: string; icon: string }> = {
+  knattspyrna: { label: "Knattspyrna", icon: "Goal" },
+  politik: { label: "Pólitík", icon: "Landmark" },
+  skak: { label: "Skák", icon: "Crown" },
+  vidskipti: { label: "Viðskipti", icon: "Briefcase" },
+  annad: { label: "Annað", icon: "MoreHorizontal" },
 };
 
-export const TAGS: Record<Tag, { label: string }> = {
-  knattspyrna: { label: "Knattspyrna" },
-  politik: { label: "Pólitík" },
-  vidskipti: { label: "Viðskipti" },
-  skak: { label: "Skák" },
-  listir: { label: "Listir" },
-  fjolmidlar: { label: "Fjölmiðlar" },
-  visindi: { label: "Vísindi" },
-  ithrottir: { label: "Íþróttir" },
-  saga: { label: "Saga" },
-  taekni: { label: "Tækni" },
-  log: { label: "Lögfræði" },
-  heilsa: { label: "Heilsa" },
-};
+export const CATEGORY_ORDER: Category[] = [
+  "knattspyrna",
+  "politik",
+  "skak",
+  "vidskipti",
+  "annad",
+];
 
-// Chess-related regex — broad because this IS a chess podcast
-const CHESS_REGEX =
-  /skák|skak[^a]|chess|leikur|opnun|endatafl|taktík|stórmeistar|elo\b|grandmaster|gambi|carlsen|magnus|kasparov|fischer|tal\b|capablanca|botvinnik|anand|kramnik|kandidata|olympi|fide|mót |turnering|sigrað|sigur|tap |ólympíu|rapid|blitz|bullet|classical|rating|titill|heimsmeistar|gm\b|fm\b|im\b|wgm|nóvísi|aðalflokk|flokkur [a-e]|skákfélag|skáksam|taflmað|borðið|hvítur|svartur|bóndi|hest|biskup|hrók|drott|konungur|matt\b|skákborð|skákturn|skáksaga|skákheim|aðrir skákmenn|spila|partí|skákpartí|chess after dark/i;
-
-// Tournament/event regex
-const TOURNAMENT_REGEX =
-  /heimsmeistaram|kandídata|ólympíul|íslandsmót|reykjavík open|skákmót|grand prix|fide|world cup|world chess|tata steel|wijk|sinquefield|st\.? louis|norway chess|candidates|olympiad|turnering|einvig|keppn|deild[^a-z]|úrslit|bikarmót|rapídmót|blitzmót/i;
-
+/**
+ * Classify an episode into 1+ categories.
+ * - Episode lands in every category whose keywords match title+description
+ * - If no category matches any of the 4 main ones -> 'annad'
+ * - Manual overrides in data/episode-overrides.json take precedence
+ */
 export function classifyEpisode(episode: {
   title: string;
   description: string;
   guests: string[];
-}): { category: Category; tags: Tag[] } {
-  const text = `${episode.title} ${episode.description}`.toLowerCase();
-  const hasGuest =
-    episode.guests.length > 0 &&
-    !episode.guests.every((g) =>
-      ["birkir", "leifur"].some((h) => g.toLowerCase().includes(h))
-    );
-
-  // MANUAL OVERRIDE FIRST
-  const override = (
-    overrides as Record<string, { category: Category; tags: Tag[] }>
-  )[episode.title];
-  if (override) return override;
-
-  const isChessHeavy = CHESS_REGEX.test(text);
-  const isTournament = TOURNAMENT_REGEX.test(text);
-
-  // TAGS (compute before category so we can use chess tag for category decision)
-  const tags: Tag[] = [];
-  const tagRules: [Tag, RegExp][] = [
-    [
-      "knattspyrna",
-      /fótbolt|knattspyrn|\bksí\b|landslið|pepsi deild|úrvalsdeild|enska deildin|meistaradeild/i,
-    ],
-    [
-      "politik",
-      /stjórnm|ráðherra|alþingi|forseti|flokk|kosning|ríkisstj|þingmað/i,
-    ],
-    [
-      "vidskipti",
-      /viðskipt|fyrirtæk|forstjór|framkvæmdastjór|rekstur|fjárfest|hagfræð|markað/i,
-    ],
-    ["skak", CHESS_REGEX],
-    [
-      "listir",
-      /tónlist|listam|leikar|rithöf|\bbók\b|málar|kvikmynd|leikhús/i,
-    ],
-    [
-      "fjolmidlar",
-      /fjölmiðl|blaðamað|ritstjór|útvarp|sjónvarp|dagblað/i,
-    ],
-    ["visindi", /vísind|prófessor|rannsókn|háskól|læknisfr|verkfræð/i],
-    [
-      "ithrottir",
-      /handbolt|körfubolt|sund|frjálsar|ólympí|afreksíþrótt/i,
-    ],
-    ["saga", /sagnfr|saga íslands|víking|landnám|sjálfstæðisb/i],
-    [
-      "taekni",
-      /tölvunarfr|forrit|\bai\b|gervigreind|tækni|startup|hugbúnað/i,
-    ],
-    ["log", /lögfr|hæstirétt|dómari|lögmað|saksóknar/i],
-    ["heilsa", /heilbrigð|læknir|sálfræð|geðheils|næring/i],
-  ];
-  for (const [tag, regex] of tagRules) {
-    if (regex.test(text)) tags.push(tag);
+}): Category[] {
+  // MANUAL OVERRIDE FIRST (by title)
+  const override = (overrides as unknown as Record<string, Category[]>)[episode.title];
+  if (override && Array.isArray(override) && override.length > 0) {
+    return override;
   }
 
-  // PRIMARY CATEGORY
-  // Priority: serstakt → mot-frettir → skakspjall (chess-focused) → vidtol (general guest interview)
-  let category: Category;
+  const text = `${episode.title} ${episode.description}`.toLowerCase();
+  const matches: Category[] = [];
+
+  // KNATTSPYRNA
   if (
-    /jól|áramót|afmæli|\blive\b|100\. þáttur|200\. þáttur|300\. þáttur/i.test(
+    /fótbolt|knattspyrn|\bksí\b|landslið(?!.*skák)|pepsi deild|úrvalsdeild|enska deildin|meistaradeild|premier league|la liga|serie a|bundesliga|champions league|heimsmeistarakeppni(?!.*skák)|\bhm\b.*fótbolt|\bem\b.*fótbolt|eurocup|uefa|fifa|messi|ronaldo|haaland|mbappe|liverpool|arsenal|man utd|manchester|chelsea|real madrid|barcelona|bayern|psg/i.test(
       text
     )
   ) {
-    category = "serstakt";
-  } else if (isTournament) {
-    category = "mot-frettir";
-  } else if (isChessHeavy) {
-    // Chess-focused episode — even with a guest, chess is the main topic
-    category = "skakspjall";
-  } else if (hasGuest) {
-    category = "vidtol";
-  } else {
-    category = "skakspjall";
+    matches.push("knattspyrna");
   }
 
-  return { category, tags };
+  // POLITIK
+  if (
+    /stjórnm|ráðherra|alþingi|forseti íslands|formaður.*flokks|sjálfstæðisfl|framsóknarfl|samfylking|vinstri græn|miðflokk|viðreisn|píratar|flokkur fólksins|sósíalist|kosning|ríkisstj|þingmað|borgarstjór|bæjarstjór|utanríkismál|innanríkismál|efnahagsmál.*ríkis/i.test(
+      text
+    )
+  ) {
+    matches.push("politik");
+  }
+
+  // SKAK
+  if (
+    /\bskák|skákmað|skákmeistar|stórmeistar|alþjóðameistar|\belo\b|grandmaster|\bfide\b|opnun|sikil|spænsk|drottningar|indversk|kóngsindversk|endatafl|taktík|gambi|carlsen|kasparov|fischer|nakamura|hikaru|caruana|ding liren|nepomnia|anand|karpov|íslandsmót í skák|reykjavík open|skákþing|skáksamband|skáksetur|skákskóli|skák-|skák\s/i.test(
+      text
+    )
+  ) {
+    matches.push("skak");
+  }
+
+  // VIDSKIPTI
+  if (
+    /viðskipt|fyrirtæk|forstjór|framkvæmdastjór|rekstur fyrirtæk|fjárfest|hagfræð|kauphöll|hlutabréf|frumkvöðul|sprotafyrirtæk|stofnand.*fyrirtæk|\bceo\b|\bcfo\b|\bcto\b|markaðsset|atvinnulíf|efnahagsl|samtök atvinnulífs|\bsa\b\s|viðskiptaráð|iðnaðarráð|verslunarráð|bankast|útrás|ölgerð|icelandair|samherji|síldarvinnslan|festi|landsbank|arion|íslandsbank|kvika|marel|össur|alvotech/i.test(
+      text
+    )
+  ) {
+    matches.push("vidskipti");
+  }
+
+  // ANNAD — only if none of the above matched
+  if (matches.length === 0) {
+    matches.push("annad");
+  }
+
+  return matches;
+}
+
+/**
+ * Count episodes per category. An episode counts once per category it's in.
+ */
+export function countByCategory(
+  episodes: { categories: Category[] }[]
+): Record<Category, number> {
+  const counts: Record<Category, number> = {
+    knattspyrna: 0,
+    politik: 0,
+    skak: 0,
+    vidskipti: 0,
+    annad: 0,
+  };
+  for (const ep of episodes) {
+    for (const cat of ep.categories) {
+      counts[cat]++;
+    }
+  }
+  return counts;
 }

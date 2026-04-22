@@ -5,7 +5,7 @@ import { fetchEpisodes } from "@/lib/rss";
 import EpisodePlayer from "@/components/EpisodePlayer";
 import { Calendar, Clock } from "lucide-react";
 import type { Metadata } from "next";
-import { CATEGORIES, TAGS } from "@/lib/categorization";
+import { CATEGORIES } from "@/lib/categorization";
 
 export const revalidate = 3600;
 
@@ -113,22 +113,16 @@ export default async function EpisodePage({ params }: PageProps) {
           <EpisodePlayer episode={episode} />
         </div>
 
-        {/* Category + Tags */}
+        {/* Categories */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-2 items-center">
-            <Link
-              href={`/thaettir?flokkur=${episode.category}`}
-              className="bg-cad-electric text-white text-sm px-3 py-1.5 rounded-lg font-medium hover:bg-cad-electric/80 transition-colors"
-            >
-              {CATEGORIES[episode.category].label}
-            </Link>
-            {episode.tags.map((tag) => (
+            {episode.categories.map((cat) => (
               <Link
-                key={tag}
-                href={`/thaettir?tags=${tag}`}
-                className="bg-cad-mid text-cad-light uppercase tracking-widest text-[10px] px-2.5 py-1.5 rounded-lg hover:bg-cad-mid/80 transition-colors"
+                key={cat}
+                href={`/thaettir?flokkur=${cat}`}
+                className="bg-cad-electric text-white text-sm px-3 py-1.5 rounded-lg font-medium hover:bg-cad-electric/80 transition-colors"
               >
-                {TAGS[tag].label}
+                {CATEGORIES[cat].label}
               </Link>
             ))}
           </div>

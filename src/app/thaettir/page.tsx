@@ -5,24 +5,22 @@ import Image from "next/image";
 import { Fragment, Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Episode } from "@/lib/rss";
-import { CATEGORIES, TAGS, type Category, type Tag } from "@/lib/categorization";
-
-const CATEGORY_KEYS = Object.keys(CATEGORIES) as Category[];
-const TAG_KEYS = Object.keys(TAGS) as Tag[];
+import { CATEGORIES, CATEGORY_ORDER, type Category } from "@/lib/categorization";
 
 const CATEGORY_ICONS: Record<Category, string> = {
-  vidtol: "🎙",
-  skakspjall: "💬",
-  "mot-frettir": "🏆",
-  serstakt: "✨",
+  knattspyrna: "\u26BD",
+  politik: "\uD83C\uDFDB",
+  skak: "\u265B",
+  vidskipti: "\uD83D\uDCBC",
+  annad: "\u22EF",
 };
 
 function formatDisplayDate(dateStr: string): string {
   const d = new Date(dateStr);
   const day = d.getDate();
   const months = [
-    "janúar", "febrúar", "mars", "apríl", "maí", "júní",
-    "júlí", "ágúst", "september", "október", "nóvember", "desember",
+    "jan\u00FAar", "febr\u00FAar", "mars", "apr\u00EDl", "ma\u00ED", "j\u00FAn\u00ED",
+    "j\u00FAl\u00ED", "\u00E1g\u00FAst", "september", "okt\u00F3ber", "n\u00F3vember", "desember",
   ];
   return `${day}. ${months[d.getMonth()]}`;
 }
@@ -72,17 +70,13 @@ function ThaettirContent() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Derive filter state directly from URL params (no effect needed)
+  // Derive filter state directly from URL params
   const guestFilter = searchParams.get("gestur");
   const flokkurParam = searchParams.get("flokkur");
   const activeCategory: Category | null =
-    flokkurParam && CATEGORY_KEYS.includes(flokkurParam as Category)
+    flokkurParam && CATEGORY_ORDER.includes(flokkurParam as Category)
       ? (flokkurParam as Category)
       : null;
-  const tagsParam = searchParams.get("tags");
-  const activeTags: Tag[] = tagsParam
-    ? (tagsParam.split(",").filter((t) => TAG_KEYS.includes(t as Tag)) as Tag[])
-    : [];
 
   useEffect(() => {
     fetch("/api/episodes")
@@ -119,11 +113,11 @@ function ThaettirContent() {
   // Dynamic document title for filtered views
   useEffect(() => {
     if (guestFilter) {
-      document.title = `Þættir með ${getGuestDisplayName(guestFilter)} — Chess After Dark`;
+      document.title = `\u00DE\u00E6ttir me\u00F0 ${getGuestDisplayName(guestFilter)} \u2014 Chess After Dark`;
     } else if (activeCategory) {
-      document.title = `Þættir · ${CATEGORIES[activeCategory].label} — Chess After Dark`;
+      document.title = `\u00DE\u00E6ttir \u00B7 ${CATEGORIES[activeCategory].label} \u2014 Chess After Dark`;
     } else {
-      document.title = "Allir þættir — Chess After Dark";
+      document.title = "Allir \u00FE\u00E6ttir \u2014 Chess After Dark";
     }
   });
 
@@ -178,37 +172,23 @@ function ThaettirContent() {
   };
 
   // Build URL from filter state
-  function pushFilterUrl(cat: Category | null, tags: Tag[], guest: string | null) {
+  function pushFilterUrl(cat: Category | null, guest: string | null) {
     const params = new URLSearchParams();
     if (cat) params.set("flokkur", cat);
-    if (tags.length > 0) params.set("tags", tags.join(","));
     if (guest) params.set("gestur", guest);
     const qs = params.toString();
     router.push(qs ? `/thaettir?${qs}` : "/thaettir", { scroll: false });
   }
 
   function handleCategoryClick(cat: Category | null) {
-    pushFilterUrl(cat, activeTags, guestFilter);
+    pushFilterUrl(cat, guestFilter);
   }
 
-  function handleTagToggle(tag: Tag) {
-    const next = activeTags.includes(tag)
-      ? activeTags.filter((t) => t !== tag)
-      : [...activeTags, tag];
-    pushFilterUrl(activeCategory, next, guestFilter);
-  }
-
-  // Category counts
+  // Category counts (multi-category: each ep counts once per category)
   const categoryCounts: Record<string, number> = {};
   for (const ep of episodes) {
-    categoryCounts[ep.category] = (categoryCounts[ep.category] || 0) + 1;
-  }
-
-  // Tag counts
-  const tagCounts: Record<string, number> = {};
-  for (const ep of episodes) {
-    for (const t of ep.tags) {
-      tagCounts[t] = (tagCounts[t] || 0) + 1;
+    for (const cat of ep.categories) {
+      categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
     }
   }
 
@@ -219,28 +199,26 @@ function ThaettirContent() {
       ep.title.toLowerCase().includes(q) ||
       ep.description.toLowerCase().includes(q) ||
       ep.guest.toLowerCase().includes(q) ||
-      ep.tags.some((t) => TAGS[t].label.toLowerCase().includes(q));
-    const matchesCategory = !activeCategory || ep.category === activeCategory;
-    const matchesTags =
-      activeTags.length === 0 || activeTags.every((t) => ep.tags.includes(t));
+      ep.categories.some((c) => CATEGORIES[c].label.toLowerCase().includes(q));
+    const matchesCategory = !activeCategory || ep.categories.includes(activeCategory);
     const matchesGuest =
       !guestFilter ||
       ep.guestSlug === guestFilter ||
       ep.guestSlugs?.includes(guestFilter);
-    return matchesSearch && matchesCategory && matchesTags && matchesGuest;
+    return matchesSearch && matchesCategory && matchesGuest;
   });
 
   const pageTitle = guestFilter
-    ? `Þættir með ${getGuestDisplayName(guestFilter)}`
+    ? `\u00DE\u00E6ttir me\u00F0 ${getGuestDisplayName(guestFilter)}`
     : activeCategory
-    ? `Þættir · ${CATEGORIES[activeCategory].label}`
-    : "Allir þættir";
+    ? `\u00DE\u00E6ttir \u00B7 ${CATEGORIES[activeCategory].label}`
+    : "Allir \u00FE\u00E6ttir";
 
   const pageSubtitle = guestFilter
-    ? `${filtered.length} ${filtered.length === 1 ? "þáttur fundinn" : "þættir fundust"} með þessum gesti`
+    ? `${filtered.length} ${filtered.length === 1 ? "\u00FE\u00E1ttur fundinn" : "\u00FE\u00E6ttir fundust"} me\u00F0 \u00FEessum gesti`
     : episodes.length > 0
-    ? `${episodes.length} þættir síðan 2019`
-    : "Hleð þáttum...";
+    ? `${episodes.length} \u00FE\u00E6ttir s\u00ED\u00F0an 2019`
+    : "Hle\u00F0 \u00FE\u00E1ttum...";
 
   return (
     <div className="min-h-screen">
@@ -254,7 +232,7 @@ function ThaettirContent() {
         <div className="max-w-6xl mx-auto flex items-end justify-between flex-wrap gap-4">
           <div>
             <p className="text-cad-light text-xs tracking-widest uppercase mb-2">
-              HLAÐVARPIÐ
+              HLA\u00D0VARPI\u00D0
             </p>
             <h1 className="text-4xl font-medium text-white mb-2">{pageTitle}</h1>
             <p className="text-white/55 text-sm">{pageSubtitle}</p>
@@ -268,7 +246,7 @@ function ThaettirContent() {
                   : "text-white/50 hover:text-white/70"
               }`}
             >
-              ▦ Grid
+              \u25A6 Grid
             </button>
             <button
               onClick={() => toggleView("list")}
@@ -278,7 +256,7 @@ function ThaettirContent() {
                   : "text-white/50 hover:text-white/70"
               }`}
             >
-              ☰ Listi
+              \u2630 Listi
             </button>
           </div>
         </div>
@@ -288,7 +266,7 @@ function ThaettirContent() {
       {guestFilter && (
         <section className="px-8 pt-5 pb-0">
           <div className="max-w-6xl mx-auto flex items-center gap-3 flex-wrap">
-            <span className="text-white/60 text-sm">Sía virk:</span>
+            <span className="text-white/60 text-sm">S\u00EDa virk:</span>
             <div className="inline-flex items-center gap-2.5 px-3 py-1.5 bg-cad-electric/15 border border-cad-electric/35 rounded-full text-cad-light text-sm">
               <span className="text-cad-light font-medium">
                 Gestur: {getGuestDisplayName(guestFilter)}
@@ -296,37 +274,37 @@ function ThaettirContent() {
               <Link
                 href="/thaettir"
                 className="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 text-xs transition-colors"
-                aria-label="Fjarlægja síu"
+                aria-label="Fjarl\u00E6gja s\u00EDu"
               >
-                ×
+                \u00D7
               </Link>
             </div>
             <span className="text-white/50 text-sm">
-              {filtered.length} {filtered.length === 1 ? "þáttur" : "þættir"}
+              {filtered.length} {filtered.length === 1 ? "\u00FE\u00E1ttur" : "\u00FE\u00E6ttir"}
             </span>
           </div>
         </section>
       )}
 
       {/* ─── SEARCH + FILTER BAR ─── */}
-      <section className="px-8 pt-5 pb-2">
+      <section className="px-8 pt-5 pb-8">
         <div className="max-w-6xl mx-auto flex flex-wrap gap-4 items-center">
           {/* Search */}
           <div className="relative max-w-[360px] w-full">
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 text-sm pointer-events-none">
-              ⌕
+              \u2315
             </span>
             <input
               ref={searchRef}
               type="text"
-              placeholder="Leita að gesti eða efni..."
+              placeholder="Leita a\u00F0 gesti e\u00F0a efni..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-white/[0.04] border border-white/10 rounded-lg py-[11px] pr-3.5 pl-[38px] text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-cad-electric transition-colors"
             />
           </div>
 
-          {/* Row 1: Category pills (single-select) */}
+          {/* Category pills (single-select) */}
           <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => handleCategoryClick(null)}
@@ -336,9 +314,9 @@ function ThaettirContent() {
                   : "border border-cad-electric/30 text-cad-light hover:border-cad-electric/60"
               }`}
             >
-              Allir · {episodes.length}
+              Allir \u00B7 {episodes.length}
             </button>
-            {CATEGORY_KEYS.map((cat) => (
+            {CATEGORY_ORDER.map((cat) => (
               <button
                 key={cat}
                 onClick={() => handleCategoryClick(activeCategory === cat ? null : cat)}
@@ -348,29 +326,8 @@ function ThaettirContent() {
                     : "border border-cad-electric/30 text-cad-light hover:border-cad-electric/60"
                 }`}
               >
-                {CATEGORY_ICONS[cat]} {CATEGORIES[cat].label} · {categoryCounts[cat] || 0}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── ROW 2: TAG PILLS (multi-select) ─── */}
-      <section className="px-8 pt-1 pb-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-cad-light/60 text-[10px] tracking-widest uppercase mr-1">TAGS</span>
-            {TAG_KEYS.filter((tag) => (tagCounts[tag] || 0) > 0).map((tag) => (
-              <button
-                key={tag}
-                onClick={() => handleTagToggle(tag)}
-                className={`px-3 py-[5px] rounded-full text-[11px] whitespace-nowrap transition-colors ${
-                  activeTags.includes(tag)
-                    ? "bg-cad-electric text-white font-medium"
-                    : "border border-cad-electric/30 text-cad-light hover:border-cad-electric/60"
-                }`}
-              >
-                {TAGS[tag].label} · <span className="text-cad-light/60">{tagCounts[tag] || 0}</span>
+                {CATEGORY_ICONS[cat]} {CATEGORIES[cat].label} \u00B7{" "}
+                <span className="text-cad-light/60">{categoryCounts[cat] || 0}</span>
               </button>
             ))}
           </div>
@@ -432,12 +389,12 @@ function ThaettirContent() {
       {!loading && filtered.length === 0 && (
         <section className="px-8 pb-12">
           <div className="max-w-6xl mx-auto text-center py-20">
-            <div className="text-5xl mb-4 opacity-30">♟</div>
+            <div className="text-5xl mb-4 opacity-30">\u265F</div>
             <h2 className="text-xl font-medium text-white mb-2">
-              Engir þættir fundust
+              Engir \u00FE\u00E6ttir fundust
             </h2>
             <p className="text-white/50 text-sm mb-6">
-              Prófaðu aðra leit eða fjarlægðu síur
+              Pr\u00F3fa\u00F0u a\u00F0ra leit e\u00F0a fjarl\u00E6g\u00F0u s\u00EDur
             </p>
             <button
               onClick={() => {
@@ -446,7 +403,7 @@ function ThaettirContent() {
               }}
               className="px-5 py-2 bg-cad-electric text-white text-sm rounded-lg hover:bg-cad-electric/80 transition-colors"
             >
-              Hreinsa síur
+              Hreinsa s\u00EDur
             </button>
           </div>
         </section>
@@ -476,7 +433,7 @@ function ThaettirContent() {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <p className="text-cad-light text-[10px] tracking-widest uppercase">
-                NÚ AÐ SPILA
+                N\u00DA A\u00D0 SPILA
               </p>
               <p className="text-sm font-medium text-white truncate">
                 {playingEp.title}
@@ -502,21 +459,21 @@ function ThaettirContent() {
               <button
                 onClick={() => seek(-15)}
                 className="w-[34px] h-[34px] bg-white/[0.06] rounded-lg flex items-center justify-center text-white/70 hover:bg-white/10 transition-colors text-xs"
-                aria-label="Spóla til baka 15 sekúndur"
+                aria-label="Sp\u00F3la til baka 15 sek\u00FAndur"
               >
                 -15
               </button>
               <button
                 onClick={(e) => handlePlay(playingEp, e)}
                 className="w-[34px] h-[34px] bg-cad-electric rounded-lg flex items-center justify-center text-white transition-colors text-xs"
-                aria-label={isPlaying ? "Pása" : "Spila"}
+                aria-label={isPlaying ? "P\u00E1sa" : "Spila"}
               >
-                {isPlaying ? "⏸" : "▶"}
+                {isPlaying ? "\u23F8" : "\u25B6"}
               </button>
               <button
                 onClick={() => seek(15)}
                 className="w-[34px] h-[34px] bg-white/[0.06] rounded-lg flex items-center justify-center text-white/70 hover:bg-white/10 transition-colors text-xs"
-                aria-label="Spóla áfram 15 sekúndur"
+                aria-label="Sp\u00F3la \u00E1fram 15 sek\u00FAndur"
               >
                 +15
               </button>
@@ -577,11 +534,6 @@ function EpisodeCard({
           #{ep.number}
         </span>
 
-        {/* Category pill (top-right) */}
-        <span className="absolute top-3 right-3 bg-cad-electric/90 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-md font-medium">
-          {CATEGORY_ICONS[ep.category]} {CATEGORIES[ep.category].label}
-        </span>
-
         {/* Duration pill */}
         <span className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-md tabular-nums">
           {ep.duration}
@@ -596,19 +548,19 @@ function EpisodeCard({
             }`}
             aria-label={`Spila ${ep.title}`}
           >
-            {isActive ? "⏸" : "▶"}
+            {isActive ? "\u23F8" : "\u25B6"}
           </button>
         )}
       </Link>
 
       {/* Body */}
       <div className="p-4">
-        {/* Meta row */}
+        {/* Meta row: categories + date */}
         <div className="flex items-center gap-1.5 mb-2.5">
-          <span className="text-cad-light text-[10px] tracking-widest uppercase">
-            {CATEGORIES[ep.category].label}
+          <span className="text-cad-light text-[11px] uppercase tracking-widest font-medium">
+            {ep.categories.map((c) => CATEGORIES[c].label).join(" \u00B7 ")}
           </span>
-          <span className="text-white/30">·</span>
+          <span className="text-white/30">\u00B7</span>
           <span className="text-white/50 text-[10px]">
             {formatDisplayDate(ep.date)}
           </span>
@@ -626,7 +578,7 @@ function EpisodeCard({
           {ep.guests && ep.guests.length > 1 ? (
             ep.guests.map((g, i) => (
               <Fragment key={i}>
-                {i > 0 && <span className="text-white/30"> · </span>}
+                {i > 0 && <span className="text-white/30"> \u00B7 </span>}
                 <Link
                   href={`/thaettir?gestur=${ep.guestSlugs?.[i] || ep.guestSlug}`}
                   className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-xs font-medium"
@@ -644,20 +596,6 @@ function EpisodeCard({
             </Link>
           )}
         </div>
-
-        {/* Tag chips */}
-        {ep.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
-            {ep.tags.map((tag) => (
-              <span
-                key={tag}
-                className="bg-cad-mid text-cad-light uppercase tracking-widest text-[10px] px-2 py-0.5 rounded"
-              >
-                {TAGS[tag].label}
-              </span>
-            ))}
-          </div>
-        )}
 
         {/* Short description */}
         <p className="text-white/50 text-xs leading-relaxed line-clamp-2">
@@ -697,7 +635,7 @@ function EpisodeListItem({
           className="w-10 h-10 bg-white/[0.06] hover:bg-cad-electric rounded-full flex items-center justify-center text-white text-xs flex-shrink-0 transition-colors"
           aria-label={`Spila ${ep.title}`}
         >
-          {isActive ? "⏸" : "▶"}
+          {isActive ? "\u23F8" : "\u25B6"}
         </button>
       )}
 
@@ -707,15 +645,15 @@ function EpisodeListItem({
           <span className="text-cad-light text-[10px] tracking-widest uppercase">
             #{ep.number}
           </span>
-          <span className="text-white/30">·</span>
+          <span className="text-white/30">\u00B7</span>
           <span className="text-white/50 text-[10px]">
             {formatDisplayDate(ep.date)}
           </span>
-          <span className="text-white/30">·</span>
+          <span className="text-white/30">\u00B7</span>
           <span className="text-cad-electric/80 text-[10px] font-medium">
-            {CATEGORIES[ep.category].label}
+            {ep.categories.map((c) => CATEGORIES[c].label).join(" \u00B7 ")}
           </span>
-          <span className="text-white/30">·</span>
+          <span className="text-white/30">\u00B7</span>
           <Link
             href={`/thaettir?gestur=${ep.guestSlug}`}
             className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-[10px] font-medium"
@@ -726,19 +664,6 @@ function EpisodeListItem({
         <Link href={`/thaettir/${ep.slug}`}>
           <h2 className="text-sm font-medium text-white truncate hover:text-cad-light transition-colors">{ep.title}</h2>
         </Link>
-        {/* Tag chips in list view */}
-        {ep.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1">
-            {ep.tags.map((tag) => (
-              <span
-                key={tag}
-                className="bg-cad-mid text-cad-light uppercase tracking-widest text-[9px] px-1.5 py-0.5 rounded"
-              >
-                {TAGS[tag].label}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Duration */}

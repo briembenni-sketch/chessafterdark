@@ -1,1 +1,3 @@
-{}
+{
+  "_comment": "Map exact episode title -> array of categories. Used when rules misclassify. Example: 'Bjarni Benediktsson': ['politik', 'vidskipti']"
+}
