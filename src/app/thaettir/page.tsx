@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Suspense, useState, useEffect, useRef, useCallback } from "react";
+import { Fragment, Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Episode } from "@/lib/rss";
 
@@ -72,6 +72,8 @@ function ThaettirContent() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
+  const guestFilter = searchParams.get("gestur");
+
   // Read ?flokkur= param on mount
   useEffect(() => {
     const flokkur = searchParams.get("flokkur");
@@ -106,6 +108,17 @@ function ThaettirContent() {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
+
+  // Dynamic document title for filtered views
+  useEffect(() => {
+    if (guestFilter) {
+      document.title = `Þættir með ${getGuestDisplayName(guestFilter)} — Chess After Dark`;
+    } else if (activeTopic !== "Allir") {
+      document.title = `Þættir · ${activeTopic} — Chess After Dark`;
+    } else {
+      document.title = "Allir þættir — Chess After Dark";
+    }
+  }, [guestFilter, activeTopic, episodes]);
 
   // Audio time update
   useEffect(() => {
@@ -176,8 +189,34 @@ function ThaettirContent() {
       ep.topics.some((t) => t.toLowerCase().includes(q));
     const matchesTopic =
       activeTopic === "Allir" || ep.topics.includes(activeTopic);
-    return matchesSearch && matchesTopic;
+    const matchesGuest =
+      !guestFilter ||
+      ep.guestSlug === guestFilter ||
+      ep.guestSlugs?.includes(guestFilter);
+    return matchesSearch && matchesTopic && matchesGuest;
   });
+
+  function getGuestDisplayName(slug: string): string {
+    const ep = episodes.find(
+      (e) => e.guestSlug === slug || e.guestSlugs?.includes(slug)
+    );
+    if (!ep) return slug;
+    if (ep.guestSlug === slug) return ep.guest;
+    const idx = ep.guestSlugs?.indexOf(slug) ?? -1;
+    return ep.guests?.[idx] ?? ep.guest;
+  }
+
+  const pageTitle = guestFilter
+    ? `Þættir með ${getGuestDisplayName(guestFilter)}`
+    : activeTopic !== "Allir"
+    ? `Þættir · ${activeTopic}`
+    : "Allir þættir";
+
+  const pageSubtitle = guestFilter
+    ? `${filtered.length} ${filtered.length === 1 ? "þáttur fundinn" : "þættir fundust"} með þessum gesti`
+    : episodes.length > 0
+    ? `${episodes.length} þættir síðan 2019`
+    : "Hleð þáttum...";
 
   return (
     <div className="min-h-screen">
@@ -193,12 +232,8 @@ function ThaettirContent() {
             <p className="text-cad-light text-xs tracking-widest uppercase mb-2">
               HLAÐVARPIÐ
             </p>
-            <h1 className="text-4xl font-medium text-white mb-2">Allir þættir</h1>
-            <p className="text-white/55 text-sm">
-              {episodes.length > 0
-                ? `${episodes.length} þættir síðan 2019`
-                : "Hleð þáttum..."}
-            </p>
+            <h1 className="text-4xl font-medium text-white mb-2">{pageTitle}</h1>
+            <p className="text-white/55 text-sm">{pageSubtitle}</p>
           </div>
           <div className="flex bg-white/5 p-1 rounded-lg">
             <button
@@ -224,6 +259,30 @@ function ThaettirContent() {
           </div>
         </div>
       </section>
+
+      {/* ─── GUEST FILTER PILL ─── */}
+      {guestFilter && (
+        <section className="px-8 pt-5 pb-0">
+          <div className="max-w-6xl mx-auto flex items-center gap-3 flex-wrap">
+            <span className="text-white/60 text-sm">Sía virk:</span>
+            <div className="inline-flex items-center gap-2.5 px-3 py-1.5 bg-cad-electric/15 border border-cad-electric/35 rounded-full text-cad-light text-sm">
+              <span className="text-cad-light font-medium">
+                Gestur: {getGuestDisplayName(guestFilter)}
+              </span>
+              <Link
+                href="/thaettir"
+                className="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 text-xs transition-colors"
+                aria-label="Fjarlægja síu"
+              >
+                ×
+              </Link>
+            </div>
+            <span className="text-white/50 text-sm">
+              {filtered.length} {filtered.length === 1 ? "þáttur" : "þættir"}
+            </span>
+          </div>
+        </section>
+      )}
 
       {/* ─── SEARCH + FILTER BAR ─── */}
       <section className="px-8 pt-5 pb-8">
@@ -443,9 +502,8 @@ function EpisodeCard({
   const isActive = playingGuid === ep.guid && isPlaying;
 
   return (
-    <Link
-      href={`/thaettir/${ep.slug}`}
-      className="group rounded-[14px] overflow-hidden transition-all duration-300 hover:-translate-y-[3px] focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:outline-none"
+    <div
+      className="group rounded-[14px] overflow-hidden transition-all duration-300 hover:-translate-y-[3px]"
       style={{
         background: "#0f1f3d",
         border: "0.5px solid rgba(255,255,255,0.06)",
@@ -458,7 +516,7 @@ function EpisodeCard({
       }}
     >
       {/* Thumbnail */}
-      <div className="aspect-square relative overflow-hidden">
+      <Link href={`/thaettir/${ep.slug}`} className="block aspect-square relative overflow-hidden">
         <Image
           src={imgError ? "/images/brand/cover-art.png" : ep.image}
           alt={ep.title}
@@ -490,7 +548,7 @@ function EpisodeCard({
             {isActive ? "⏸" : "▶"}
           </button>
         )}
-      </div>
+      </Link>
 
       {/* Body */}
       <div className="p-4">
@@ -506,16 +564,42 @@ function EpisodeCard({
         </div>
 
         {/* Title */}
-        <h2 className="text-[15px] font-medium text-white leading-[1.35] mb-1.5 line-clamp-2">
-          {ep.title}
-        </h2>
+        <Link href={`/thaettir/${ep.slug}`}>
+          <h2 className="text-[15px] font-medium text-white leading-[1.35] mb-1.5 line-clamp-2 hover:text-cad-light transition-colors">
+            {ep.title}
+          </h2>
+        </Link>
+
+        {/* Guest name(s) */}
+        <div className="mb-1.5">
+          {ep.guests && ep.guests.length > 1 ? (
+            ep.guests.map((g, i) => (
+              <Fragment key={i}>
+                {i > 0 && <span className="text-white/30"> · </span>}
+                <Link
+                  href={`/thaettir?gestur=${ep.guestSlugs?.[i] || ep.guestSlug}`}
+                  className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-xs font-medium"
+                >
+                  {g}
+                </Link>
+              </Fragment>
+            ))
+          ) : (
+            <Link
+              href={`/thaettir?gestur=${ep.guestSlug}`}
+              className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-xs font-medium"
+            >
+              {ep.guest}
+            </Link>
+          )}
+        </div>
 
         {/* Short description */}
         <p className="text-white/50 text-xs leading-relaxed line-clamp-2">
           {ep.shortDescription}
         </p>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -534,9 +618,8 @@ function EpisodeListItem({
   const isActive = playingGuid === ep.guid && isPlaying;
 
   return (
-    <Link
-      href={`/thaettir/${ep.slug}`}
-      className="group flex items-center gap-4 rounded-xl p-4 transition-all duration-300 hover:bg-white/[0.03] focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:outline-none"
+    <div
+      className="group flex items-center gap-4 rounded-xl p-4 transition-all duration-300 hover:bg-white/[0.03]"
       style={{
         background: "#0f1f3d",
         border: "0.5px solid rgba(255,255,255,0.06)",
@@ -563,14 +646,23 @@ function EpisodeListItem({
           <span className="text-white/50 text-[10px]">
             {formatDisplayDate(ep.date)}
           </span>
+          <span className="text-white/30">·</span>
+          <Link
+            href={`/thaettir?gestur=${ep.guestSlug}`}
+            className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-[10px] font-medium"
+          >
+            {ep.guest}
+          </Link>
         </div>
-        <h2 className="text-sm font-medium text-white truncate">{ep.title}</h2>
+        <Link href={`/thaettir/${ep.slug}`}>
+          <h2 className="text-sm font-medium text-white truncate hover:text-cad-light transition-colors">{ep.title}</h2>
+        </Link>
       </div>
 
       {/* Duration */}
       <span className="text-white/40 text-xs tabular-nums flex-shrink-0">
         {ep.duration}
       </span>
-    </Link>
+    </div>
   );
 }

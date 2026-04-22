@@ -87,6 +87,24 @@ export default async function EpisodePage({ params }: PageProps) {
           {episode.title}
         </h1>
 
+        {/* Guest info */}
+        <div className="text-white/60 text-sm mb-4">
+          <span>Gestur: </span>
+          <Link
+            href={`/thaettir?gestur=${episode.guestSlug}`}
+            className="text-cad-light hover:text-white underline underline-offset-2 decoration-dotted transition-colors"
+          >
+            {episode.guest}
+          </Link>
+          {" · "}
+          <Link
+            href={`/thaettir?gestur=${episode.guestSlug}`}
+            className="text-cad-light hover:text-white text-xs transition-colors"
+          >
+            Sjá alla þætti →
+          </Link>
+        </div>
+
         <div className="whitespace-pre-line text-muted text-lg mb-8">{episode.description}</div>
 
         {/* Episode Player */}

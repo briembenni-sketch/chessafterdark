@@ -6,6 +6,9 @@ export interface Episode {
   slug: string;
   title: string;
   guest: string;
+  guestSlug: string;
+  guests?: string[];
+  guestSlugs?: string[];
   date: string;
   duration: string;
   description: string;
@@ -40,16 +43,47 @@ function cleanTitle(rawTitle: string): string {
   return rawTitle.replace(/^#?\d+\s*[-–—.:]?\s*/, "").trim();
 }
 
-function parseGuest(title: string): string {
-  const cleaned = cleanTitle(title);
-  const separators = [" – ", " — ", " - ", " með "];
-  for (const sep of separators) {
-    const idx = cleaned.indexOf(sep);
-    if (idx !== -1) {
-      return cleaned.substring(idx + sep.length).trim();
-    }
-  }
-  return cleaned;
+export function slugifyIcelandic(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/þ/g, "th")
+    .replace(/ð/g, "d")
+    .replace(/æ/g, "ae")
+    .replace(/ö/g, "o")
+    .replace(/á/g, "a")
+    .replace(/é/g, "e")
+    .replace(/í/g, "i")
+    .replace(/ó/g, "o")
+    .replace(/ú/g, "u")
+    .replace(/ý/g, "y")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function extractGuest(rawTitle: string): {
+  name: string;
+  slug: string;
+  allGuests: string[];
+  allSlugs: string[];
+} {
+  const clean = cleanTitle(rawTitle);
+
+  // Get just the name part (before any dash/em-dash/comma indicating role)
+  const namePart = clean.split(/\s*[–—]\s*/)[0].trim();
+
+  // Split on common separators for multi-guest episodes
+  const separators = /\s+(?:&|og|\+|\/)\s+/i;
+  const allGuests = namePart.split(separators).map((s) => s.trim()).filter(Boolean);
+  const allSlugs = allGuests.map(slugifyIcelandic);
+
+  return {
+    name: allGuests[0] || clean,
+    slug: allSlugs[0] || slugifyIcelandic(clean),
+    allGuests,
+    allSlugs,
+  };
 }
 
 function htmlToText(html: string): string {
@@ -186,12 +220,17 @@ export async function fetchEpisodes(): Promise<Episode[]> {
 
       const cleaned = cleanTitle(title);
       const shortDesc = makeShortDescription(desc);
+      const guestInfo = extractGuest(title);
 
       return {
         number: epNum,
         slug: slugify(title),
         title: cleaned,
-        guest: parseGuest(title),
+        guest: guestInfo.name,
+        guestSlug: guestInfo.slug,
+        ...(guestInfo.allGuests.length > 1
+          ? { guests: guestInfo.allGuests, guestSlugs: guestInfo.allSlugs }
+          : {}),
         date: formatDate(String(item.pubDate || "")),
         duration,
         description: desc,
@@ -210,19 +249,23 @@ export async function fetchEpisodes(): Promise<Episode[]> {
   } catch (err) {
     console.error("RSS fetch error, using fallback:", err);
     // Fall back to static data
-    return fallbackEpisodes.map((ep, idx) => ({
-      number: ep.episodeNumber,
-      slug: ep.slug,
-      title: ep.title,
-      guest: ep.guests[0] || "",
-      date: ep.date,
-      duration: "0:00",
-      description: ep.description,
-      shortDescription: ep.description.substring(0, 160),
-      audioUrl: "",
-      image: ep.thumbnail || "/images/brand/cover-art.png",
-      topics: ep.topics,
-      guid: `fallback-${idx}`,
-    }));
+    return fallbackEpisodes.map((ep, idx) => {
+      const guestName = ep.guests[0] || "";
+      return {
+        number: ep.episodeNumber,
+        slug: ep.slug,
+        title: ep.title,
+        guest: guestName,
+        guestSlug: slugifyIcelandic(guestName),
+        date: ep.date,
+        duration: "0:00",
+        description: ep.description,
+        shortDescription: ep.description.substring(0, 160),
+        audioUrl: "",
+        image: ep.thumbnail || "/images/brand/cover-art.png",
+        topics: ep.topics,
+        guid: `fallback-${idx}`,
+      };
+    });
   }
 }
