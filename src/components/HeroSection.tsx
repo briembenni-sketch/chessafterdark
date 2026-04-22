@@ -155,28 +155,29 @@ export default function HeroSection({
 
             {/* Stats row */}
             <motion.div
-              className="border-t border-white/10 pt-6 flex flex-wrap justify-center lg:justify-start items-baseline gap-8"
+              className="mt-10 grid grid-cols-3 gap-px bg-cad-electric/15 rounded-lg overflow-hidden max-w-2xl mx-auto lg:mx-0"
               variants={fadeInUp}
               initial="hidden"
               animate="visible"
               custom={0.5}
             >
-              <div>
-                <span className="text-2xl font-medium text-white">
-                  {episodeCount}+
-                </span>
-                <span className="text-xs text-white/45 ml-1.5">þættir</span>
-              </div>
-              <div>
-                <span className="text-2xl font-medium text-white">2.5M+</span>
-                <span className="text-xs text-white/45 ml-1.5">spilanir</span>
-              </div>
-              <div>
-                <span className="text-2xl font-medium text-white">1M+</span>
-                <span className="text-[11px] text-white/45 ml-1.5">
-                  hlustaðir klukkutímar
-                </span>
-              </div>
+              {[
+                { value: `${episodeCount}+`, label: 'Þættir' },
+                { value: '2.5M+', label: 'Spilanir' },
+                { value: '1M+', label: 'Klukkutímar hlustaðir' },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="bg-cad-dark px-6 py-8 flex flex-col items-center justify-center text-center"
+                >
+                  <div className="text-4xl sm:text-5xl md:text-6xl font-medium text-white tabular-nums tracking-tight leading-none">
+                    {stat.value}
+                  </div>
+                  <div className="mt-3 text-[11px] uppercase tracking-widest text-cad-light font-medium">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
             </motion.div>
           </div>
         </div>

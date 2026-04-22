@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -40,27 +41,20 @@ const platformLinks = [
 ];
 
 function Logo({ small = false }: { small?: boolean }) {
-  const pillSize = small
-    ? "text-[10px] px-2 py-[3px]"
-    : "text-[12px] px-[10px] py-1";
-  const textSize = small ? "text-xs" : "text-sm";
-
   return (
     <Link
       href="/"
-      className="flex items-center gap-0 hover:opacity-90 transition-opacity"
-      aria-label="Chess After Dark — Forsíða"
+      className="flex items-center group"
+      aria-label="Chess After Dark heim"
     >
-      <span
-        className={`bg-white text-cad-dark font-bold rounded-sm ${pillSize} tracking-[0.5px] leading-none`}
-      >
-        CHESS
-      </span>
-      <span
-        className={`font-bold text-white ${textSize} tracking-[0.5px] ml-2 leading-none`}
-      >
-        AFTER DARK
-      </span>
+      <Image
+        src="/images/logos/cad-logo-blue.png"
+        alt="Chess After Dark"
+        width={180}
+        height={48}
+        priority
+        className={`${small ? "h-8" : "h-10"} w-auto transition-opacity group-hover:opacity-80`}
+      />
     </Link>
   );
 }
