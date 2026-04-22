@@ -7,12 +7,12 @@ export type Category =
   | "vidskipti"
   | "annad";
 
-export const CATEGORIES: Record<Category, { label: string; icon: string }> = {
-  knattspyrna: { label: "Knattspyrna", icon: "Goal" },
-  politik: { label: "Pólitík", icon: "Landmark" },
-  skak: { label: "Skák", icon: "Crown" },
-  vidskipti: { label: "Viðskipti", icon: "Briefcase" },
-  annad: { label: "Annað", icon: "MoreHorizontal" },
+export const CATEGORIES: Record<Category, { label: string }> = {
+  knattspyrna: { label: "Knattspyrna" },
+  politik: { label: "Pólitík" },
+  skak: { label: "Skák" },
+  vidskipti: { label: "Viðskipti" },
+  annad: { label: "Annað" },
 };
 
 export const CATEGORY_ORDER: Category[] = [

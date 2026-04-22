@@ -7,20 +7,12 @@ import { useSearchParams, useRouter } from "next/navigation";
 import type { Episode } from "@/lib/rss";
 import { CATEGORIES, CATEGORY_ORDER, type Category } from "@/lib/categorization";
 
-const CATEGORY_ICONS: Record<Category, string> = {
-  knattspyrna: "\u26BD",
-  politik: "\uD83C\uDFDB",
-  skak: "\u265B",
-  vidskipti: "\uD83D\uDCBC",
-  annad: "\u22EF",
-};
-
 function formatDisplayDate(dateStr: string): string {
   const d = new Date(dateStr);
   const day = d.getDate();
   const months = [
-    "jan\u00FAar", "febr\u00FAar", "mars", "apr\u00EDl", "ma\u00ED", "j\u00FAn\u00ED",
-    "j\u00FAl\u00ED", "\u00E1g\u00FAst", "september", "okt\u00F3ber", "n\u00F3vember", "desember",
+    "janúar", "febrúar", "mars", "apríl", "maí", "júní",
+    "júlí", "ágúst", "september", "október", "nóvember", "desember",
   ];
   return `${day}. ${months[d.getMonth()]}`;
 }
@@ -113,11 +105,11 @@ function ThaettirContent() {
   // Dynamic document title for filtered views
   useEffect(() => {
     if (guestFilter) {
-      document.title = `\u00DE\u00E6ttir me\u00F0 ${getGuestDisplayName(guestFilter)} \u2014 Chess After Dark`;
+      document.title = `Þættir með ${getGuestDisplayName(guestFilter)} — Chess After Dark`;
     } else if (activeCategory) {
-      document.title = `\u00DE\u00E6ttir \u00B7 ${CATEGORIES[activeCategory].label} \u2014 Chess After Dark`;
+      document.title = `Þættir · ${CATEGORIES[activeCategory].label} — Chess After Dark`;
     } else {
-      document.title = "Allir \u00FE\u00E6ttir \u2014 Chess After Dark";
+      document.title = "Allir þættir — Chess After Dark";
     }
   });
 
@@ -209,16 +201,16 @@ function ThaettirContent() {
   });
 
   const pageTitle = guestFilter
-    ? `\u00DE\u00E6ttir me\u00F0 ${getGuestDisplayName(guestFilter)}`
+    ? `Þættir með ${getGuestDisplayName(guestFilter)}`
     : activeCategory
-    ? `\u00DE\u00E6ttir \u00B7 ${CATEGORIES[activeCategory].label}`
-    : "Allir \u00FE\u00E6ttir";
+    ? `Þættir · ${CATEGORIES[activeCategory].label}`
+    : "Allir þættir";
 
   const pageSubtitle = guestFilter
-    ? `${filtered.length} ${filtered.length === 1 ? "\u00FE\u00E1ttur fundinn" : "\u00FE\u00E6ttir fundust"} me\u00F0 \u00FEessum gesti`
+    ? `${filtered.length} ${filtered.length === 1 ? "þáttur fundinn" : "þættir fundust"} með þessum gesti`
     : episodes.length > 0
-    ? `${episodes.length} \u00FE\u00E6ttir s\u00ED\u00F0an 2019`
-    : "Hle\u00F0 \u00FE\u00E1ttum...";
+    ? `${episodes.length} þættir síðan 2019`
+    : "Hleð þáttum...";
 
   return (
     <div className="min-h-screen">
@@ -232,7 +224,7 @@ function ThaettirContent() {
         <div className="max-w-6xl mx-auto flex items-end justify-between flex-wrap gap-4">
           <div>
             <p className="text-cad-light text-xs tracking-widest uppercase mb-2">
-              HLA\u00D0VARPI\u00D0
+              HLAÐVARPIÐ
             </p>
             <h1 className="text-4xl font-medium text-white mb-2">{pageTitle}</h1>
             <p className="text-white/55 text-sm">{pageSubtitle}</p>
@@ -246,7 +238,7 @@ function ThaettirContent() {
                   : "text-white/50 hover:text-white/70"
               }`}
             >
-              \u25A6 Grid
+              Grid
             </button>
             <button
               onClick={() => toggleView("list")}
@@ -256,7 +248,7 @@ function ThaettirContent() {
                   : "text-white/50 hover:text-white/70"
               }`}
             >
-              \u2630 Listi
+              Listi
             </button>
           </div>
         </div>
@@ -266,7 +258,7 @@ function ThaettirContent() {
       {guestFilter && (
         <section className="px-8 pt-5 pb-0">
           <div className="max-w-6xl mx-auto flex items-center gap-3 flex-wrap">
-            <span className="text-white/60 text-sm">S\u00EDa virk:</span>
+            <span className="text-white/60 text-sm">Sía virk:</span>
             <div className="inline-flex items-center gap-2.5 px-3 py-1.5 bg-cad-electric/15 border border-cad-electric/35 rounded-full text-cad-light text-sm">
               <span className="text-cad-light font-medium">
                 Gestur: {getGuestDisplayName(guestFilter)}
@@ -274,13 +266,13 @@ function ThaettirContent() {
               <Link
                 href="/thaettir"
                 className="w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 text-xs transition-colors"
-                aria-label="Fjarl\u00E6gja s\u00EDu"
+                aria-label="Fjarlægja síu"
               >
-                \u00D7
+                ×
               </Link>
             </div>
             <span className="text-white/50 text-sm">
-              {filtered.length} {filtered.length === 1 ? "\u00FE\u00E1ttur" : "\u00FE\u00E6ttir"}
+              {filtered.length} {filtered.length === 1 ? "þáttur" : "þættir"}
             </span>
           </div>
         </section>
@@ -291,16 +283,13 @@ function ThaettirContent() {
         <div className="max-w-6xl mx-auto flex flex-wrap gap-4 items-center">
           {/* Search */}
           <div className="relative max-w-[360px] w-full">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 text-sm pointer-events-none">
-              \u2315
-            </span>
             <input
               ref={searchRef}
               type="text"
-              placeholder="Leita a\u00F0 gesti e\u00F0a efni..."
+              placeholder="Leita að gesti eða efni..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/10 rounded-lg py-[11px] pr-3.5 pl-[38px] text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-cad-electric transition-colors"
+              className="w-full bg-white/[0.04] border border-white/10 rounded-lg py-[11px] pr-3.5 pl-3.5 text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-cad-electric transition-colors"
             />
           </div>
 
@@ -314,7 +303,7 @@ function ThaettirContent() {
                   : "border border-cad-electric/30 text-cad-light hover:border-cad-electric/60"
               }`}
             >
-              Allir \u00B7 {episodes.length}
+              Allir · {episodes.length}
             </button>
             {CATEGORY_ORDER.map((cat) => (
               <button
@@ -326,8 +315,7 @@ function ThaettirContent() {
                     : "border border-cad-electric/30 text-cad-light hover:border-cad-electric/60"
                 }`}
               >
-                {CATEGORY_ICONS[cat]} {CATEGORIES[cat].label} \u00B7{" "}
-                <span className="text-cad-light/60">{categoryCounts[cat] || 0}</span>
+                {CATEGORIES[cat].label} <span className="text-cad-light/60">· {categoryCounts[cat] || 0}</span>
               </button>
             ))}
           </div>
@@ -389,12 +377,12 @@ function ThaettirContent() {
       {!loading && filtered.length === 0 && (
         <section className="px-8 pb-12">
           <div className="max-w-6xl mx-auto text-center py-20">
-            <div className="text-5xl mb-4 opacity-30">\u265F</div>
+            <div className="text-5xl mb-4 opacity-30">&#x265F;</div>
             <h2 className="text-xl font-medium text-white mb-2">
-              Engir \u00FE\u00E6ttir fundust
+              Engir þættir fundust
             </h2>
             <p className="text-white/50 text-sm mb-6">
-              Pr\u00F3fa\u00F0u a\u00F0ra leit e\u00F0a fjarl\u00E6g\u00F0u s\u00EDur
+              Prófaðu aðra leit eða fjarlægðu síur
             </p>
             <button
               onClick={() => {
@@ -403,7 +391,7 @@ function ThaettirContent() {
               }}
               className="px-5 py-2 bg-cad-electric text-white text-sm rounded-lg hover:bg-cad-electric/80 transition-colors"
             >
-              Hreinsa s\u00EDur
+              Hreinsa síur
             </button>
           </div>
         </section>
@@ -433,7 +421,7 @@ function ThaettirContent() {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <p className="text-cad-light text-[10px] tracking-widest uppercase">
-                N\u00DA A\u00D0 SPILA
+                NÚ AÐ SPILA
               </p>
               <p className="text-sm font-medium text-white truncate">
                 {playingEp.title}
@@ -459,21 +447,21 @@ function ThaettirContent() {
               <button
                 onClick={() => seek(-15)}
                 className="w-[34px] h-[34px] bg-white/[0.06] rounded-lg flex items-center justify-center text-white/70 hover:bg-white/10 transition-colors text-xs"
-                aria-label="Sp\u00F3la til baka 15 sek\u00FAndur"
+                aria-label="Spóla til baka 15 sekúndur"
               >
                 -15
               </button>
               <button
                 onClick={(e) => handlePlay(playingEp, e)}
                 className="w-[34px] h-[34px] bg-cad-electric rounded-lg flex items-center justify-center text-white transition-colors text-xs"
-                aria-label={isPlaying ? "P\u00E1sa" : "Spila"}
+                aria-label={isPlaying ? "Pása" : "Spila"}
               >
-                {isPlaying ? "\u23F8" : "\u25B6"}
+                {isPlaying ? "&#x23F8;" : "&#x25B6;"}
               </button>
               <button
                 onClick={() => seek(15)}
                 className="w-[34px] h-[34px] bg-white/[0.06] rounded-lg flex items-center justify-center text-white/70 hover:bg-white/10 transition-colors text-xs"
-                aria-label="Sp\u00F3la \u00E1fram 15 sek\u00FAndur"
+                aria-label="Spóla áfram 15 sekúndur"
               >
                 +15
               </button>
@@ -548,7 +536,7 @@ function EpisodeCard({
             }`}
             aria-label={`Spila ${ep.title}`}
           >
-            {isActive ? "\u23F8" : "\u25B6"}
+            {isActive ? "&#x23F8;" : "&#x25B6;"}
           </button>
         )}
       </Link>
@@ -558,9 +546,9 @@ function EpisodeCard({
         {/* Meta row: categories + date */}
         <div className="flex items-center gap-1.5 mb-2.5">
           <span className="text-cad-light text-[11px] uppercase tracking-widest font-medium">
-            {ep.categories.map((c) => CATEGORIES[c].label).join(" \u00B7 ")}
+            {ep.categories.map((c) => CATEGORIES[c].label).join(" · ")}
           </span>
-          <span className="text-white/30">\u00B7</span>
+          <span className="text-white/30">·</span>
           <span className="text-white/50 text-[10px]">
             {formatDisplayDate(ep.date)}
           </span>
@@ -578,7 +566,7 @@ function EpisodeCard({
           {ep.guests && ep.guests.length > 1 ? (
             ep.guests.map((g, i) => (
               <Fragment key={i}>
-                {i > 0 && <span className="text-white/30"> \u00B7 </span>}
+                {i > 0 && <span className="text-white/30"> · </span>}
                 <Link
                   href={`/thaettir?gestur=${ep.guestSlugs?.[i] || ep.guestSlug}`}
                   className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-xs font-medium"
@@ -635,7 +623,7 @@ function EpisodeListItem({
           className="w-10 h-10 bg-white/[0.06] hover:bg-cad-electric rounded-full flex items-center justify-center text-white text-xs flex-shrink-0 transition-colors"
           aria-label={`Spila ${ep.title}`}
         >
-          {isActive ? "\u23F8" : "\u25B6"}
+          {isActive ? "&#x23F8;" : "&#x25B6;"}
         </button>
       )}
 
@@ -645,15 +633,15 @@ function EpisodeListItem({
           <span className="text-cad-light text-[10px] tracking-widest uppercase">
             #{ep.number}
           </span>
-          <span className="text-white/30">\u00B7</span>
+          <span className="text-white/30">·</span>
           <span className="text-white/50 text-[10px]">
             {formatDisplayDate(ep.date)}
           </span>
-          <span className="text-white/30">\u00B7</span>
+          <span className="text-white/30">·</span>
           <span className="text-cad-electric/80 text-[10px] font-medium">
-            {ep.categories.map((c) => CATEGORIES[c].label).join(" \u00B7 ")}
+            {ep.categories.map((c) => CATEGORIES[c].label).join(" · ")}
           </span>
-          <span className="text-white/30">\u00B7</span>
+          <span className="text-white/30">·</span>
           <Link
             href={`/thaettir?gestur=${ep.guestSlug}`}
             className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-[10px] font-medium"
