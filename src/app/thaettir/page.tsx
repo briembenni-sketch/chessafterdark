@@ -5,8 +5,17 @@ import Image from "next/image";
 import { Fragment, Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Episode } from "@/lib/rss";
+import { CATEGORIES, TAGS, type Category, type Tag } from "@/lib/categorization";
 
-const TOPIC_FILTERS = ["Allir", "Knattspyrna", "Pólitík", "Viðskipti", "Skák", "Almennt"];
+const CATEGORY_KEYS = Object.keys(CATEGORIES) as Category[];
+const TAG_KEYS = Object.keys(TAGS) as Tag[];
+
+const CATEGORY_ICONS: Record<Category, string> = {
+  vidtol: "🎙",
+  skakspjall: "💬",
+  "mot-frettir": "🏆",
+  serstakt: "✨",
+};
 
 function formatDisplayDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -33,20 +42,6 @@ function formatTime(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-const categoryMap: Record<string, string> = {
-  knattspyrna: "Knattspyrna",
-  politik: "Pólitík",
-  vidskipti: "Viðskipti",
-  skak: "Skák",
-};
-
-const categorySlugMap: Record<string, string> = {
-  Knattspyrna: "knattspyrna",
-  "Pólitík": "politik",
-  "Viðskipti": "vidskipti",
-  "Skák": "skak",
-};
-
 export default function ThaettirPage() {
   return (
     <Suspense>
@@ -59,10 +54,15 @@ function ThaettirContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [activeTopic, setActiveTopic] = useState("Allir");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("cad-view-mode");
+      if (saved === "list" || saved === "grid") return saved;
+    }
+    return "grid";
+  });
 
   // Audio player state
   const [playingEp, setPlayingEp] = useState<Episode | null>(null);
@@ -72,20 +72,17 @@ function ThaettirContent() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
+  // Derive filter state directly from URL params (no effect needed)
   const guestFilter = searchParams.get("gestur");
-
-  // Read ?flokkur= param on mount
-  useEffect(() => {
-    const flokkur = searchParams.get("flokkur");
-    if (flokkur && categoryMap[flokkur]) {
-      setActiveTopic(categoryMap[flokkur]);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("cad-view-mode");
-    if (saved === "list" || saved === "grid") setViewMode(saved);
-  }, []);
+  const flokkurParam = searchParams.get("flokkur");
+  const activeCategory: Category | null =
+    flokkurParam && CATEGORY_KEYS.includes(flokkurParam as Category)
+      ? (flokkurParam as Category)
+      : null;
+  const tagsParam = searchParams.get("tags");
+  const activeTags: Tag[] = tagsParam
+    ? (tagsParam.split(",").filter((t) => TAG_KEYS.includes(t as Tag)) as Tag[])
+    : [];
 
   useEffect(() => {
     fetch("/api/episodes")
@@ -109,16 +106,26 @@ function ThaettirContent() {
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
+  function getGuestDisplayName(slug: string): string {
+    const ep = episodes.find(
+      (e) => e.guestSlug === slug || e.guestSlugs?.includes(slug)
+    );
+    if (!ep) return slug;
+    if (ep.guestSlug === slug) return ep.guest;
+    const idx = ep.guestSlugs?.indexOf(slug) ?? -1;
+    return ep.guests?.[idx] ?? ep.guest;
+  }
+
   // Dynamic document title for filtered views
   useEffect(() => {
     if (guestFilter) {
       document.title = `Þættir með ${getGuestDisplayName(guestFilter)} — Chess After Dark`;
-    } else if (activeTopic !== "Allir") {
-      document.title = `Þættir · ${activeTopic} — Chess After Dark`;
+    } else if (activeCategory) {
+      document.title = `Þættir · ${CATEGORIES[activeCategory].label} — Chess After Dark`;
     } else {
       document.title = "Allir þættir — Chess After Dark";
     }
-  }, [guestFilter, activeTopic, episodes]);
+  });
 
   // Audio time update
   useEffect(() => {
@@ -141,7 +148,6 @@ function ThaettirContent() {
     e.preventDefault();
     e.stopPropagation();
     if (playingEp?.guid === ep.guid) {
-      // Toggle play/pause
       if (isPlaying) {
         audioRef.current?.pause();
         setIsPlaying(false);
@@ -171,11 +177,38 @@ function ThaettirContent() {
     localStorage.setItem("cad-view-mode", mode);
   };
 
-  // Topic counts
-  const topicCounts: Record<string, number> = {};
+  // Build URL from filter state
+  function pushFilterUrl(cat: Category | null, tags: Tag[], guest: string | null) {
+    const params = new URLSearchParams();
+    if (cat) params.set("flokkur", cat);
+    if (tags.length > 0) params.set("tags", tags.join(","));
+    if (guest) params.set("gestur", guest);
+    const qs = params.toString();
+    router.push(qs ? `/thaettir?${qs}` : "/thaettir", { scroll: false });
+  }
+
+  function handleCategoryClick(cat: Category | null) {
+    pushFilterUrl(cat, activeTags, guestFilter);
+  }
+
+  function handleTagToggle(tag: Tag) {
+    const next = activeTags.includes(tag)
+      ? activeTags.filter((t) => t !== tag)
+      : [...activeTags, tag];
+    pushFilterUrl(activeCategory, next, guestFilter);
+  }
+
+  // Category counts
+  const categoryCounts: Record<string, number> = {};
   for (const ep of episodes) {
-    for (const t of ep.topics) {
-      topicCounts[t] = (topicCounts[t] || 0) + 1;
+    categoryCounts[ep.category] = (categoryCounts[ep.category] || 0) + 1;
+  }
+
+  // Tag counts
+  const tagCounts: Record<string, number> = {};
+  for (const ep of episodes) {
+    for (const t of ep.tags) {
+      tagCounts[t] = (tagCounts[t] || 0) + 1;
     }
   }
 
@@ -186,30 +219,21 @@ function ThaettirContent() {
       ep.title.toLowerCase().includes(q) ||
       ep.description.toLowerCase().includes(q) ||
       ep.guest.toLowerCase().includes(q) ||
-      ep.topics.some((t) => t.toLowerCase().includes(q));
-    const matchesTopic =
-      activeTopic === "Allir" || ep.topics.includes(activeTopic);
+      ep.tags.some((t) => TAGS[t].label.toLowerCase().includes(q));
+    const matchesCategory = !activeCategory || ep.category === activeCategory;
+    const matchesTags =
+      activeTags.length === 0 || activeTags.every((t) => ep.tags.includes(t));
     const matchesGuest =
       !guestFilter ||
       ep.guestSlug === guestFilter ||
       ep.guestSlugs?.includes(guestFilter);
-    return matchesSearch && matchesTopic && matchesGuest;
+    return matchesSearch && matchesCategory && matchesTags && matchesGuest;
   });
-
-  function getGuestDisplayName(slug: string): string {
-    const ep = episodes.find(
-      (e) => e.guestSlug === slug || e.guestSlugs?.includes(slug)
-    );
-    if (!ep) return slug;
-    if (ep.guestSlug === slug) return ep.guest;
-    const idx = ep.guestSlugs?.indexOf(slug) ?? -1;
-    return ep.guests?.[idx] ?? ep.guest;
-  }
 
   const pageTitle = guestFilter
     ? `Þættir með ${getGuestDisplayName(guestFilter)}`
-    : activeTopic !== "Allir"
-    ? `Þættir · ${activeTopic}`
+    : activeCategory
+    ? `Þættir · ${CATEGORIES[activeCategory].label}`
     : "Allir þættir";
 
   const pageSubtitle = guestFilter
@@ -285,7 +309,7 @@ function ThaettirContent() {
       )}
 
       {/* ─── SEARCH + FILTER BAR ─── */}
-      <section className="px-8 pt-5 pb-8">
+      <section className="px-8 pt-5 pb-2">
         <div className="max-w-6xl mx-auto flex flex-wrap gap-4 items-center">
           {/* Search */}
           <div className="relative max-w-[360px] w-full">
@@ -302,29 +326,51 @@ function ThaettirContent() {
             />
           </div>
 
-          {/* Category pills */}
+          {/* Row 1: Category pills (single-select) */}
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {TOPIC_FILTERS.map((topic) => (
+            <button
+              onClick={() => handleCategoryClick(null)}
+              className={`px-3.5 py-[7px] rounded-full text-xs whitespace-nowrap transition-colors ${
+                !activeCategory
+                  ? "bg-cad-electric text-white font-medium"
+                  : "border border-cad-electric/30 text-cad-light hover:border-cad-electric/60"
+              }`}
+            >
+              Allir · {episodes.length}
+            </button>
+            {CATEGORY_KEYS.map((cat) => (
               <button
-                key={topic}
-                onClick={() => {
-                  setActiveTopic(topic);
-                  const slug = categorySlugMap[topic];
-                  if (slug) {
-                    router.push(`/thaettir?flokkur=${slug}`, { scroll: false });
-                  } else {
-                    router.push("/thaettir", { scroll: false });
-                  }
-                }}
+                key={cat}
+                onClick={() => handleCategoryClick(activeCategory === cat ? null : cat)}
                 className={`px-3.5 py-[7px] rounded-full text-xs whitespace-nowrap transition-colors ${
-                  activeTopic === topic
+                  activeCategory === cat
                     ? "bg-cad-electric text-white font-medium"
-                    : "bg-white/5 border border-white/10 text-white/75 hover:bg-white/10"
+                    : "border border-cad-electric/30 text-cad-light hover:border-cad-electric/60"
                 }`}
               >
-                {topic === "Allir"
-                  ? "Allir"
-                  : `${topic} · ${topicCounts[topic] || 0}`}
+                {CATEGORY_ICONS[cat]} {CATEGORIES[cat].label} · {categoryCounts[cat] || 0}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── ROW 2: TAG PILLS (multi-select) ─── */}
+      <section className="px-8 pt-1 pb-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-cad-light/60 text-[10px] tracking-widest uppercase mr-1">TAGS</span>
+            {TAG_KEYS.filter((tag) => (tagCounts[tag] || 0) > 0).map((tag) => (
+              <button
+                key={tag}
+                onClick={() => handleTagToggle(tag)}
+                className={`px-3 py-[5px] rounded-full text-[11px] whitespace-nowrap transition-colors ${
+                  activeTags.includes(tag)
+                    ? "bg-cad-electric text-white font-medium"
+                    : "border border-cad-electric/30 text-cad-light hover:border-cad-electric/60"
+                }`}
+              >
+                {TAGS[tag].label} · <span className="text-cad-light/60">{tagCounts[tag] || 0}</span>
               </button>
             ))}
           </div>
@@ -396,7 +442,7 @@ function ThaettirContent() {
             <button
               onClick={() => {
                 setSearch("");
-                setActiveTopic("Allir");
+                router.push("/thaettir", { scroll: false });
               }}
               className="px-5 py-2 bg-cad-electric text-white text-sm rounded-lg hover:bg-cad-electric/80 transition-colors"
             >
@@ -531,6 +577,11 @@ function EpisodeCard({
           #{ep.number}
         </span>
 
+        {/* Category pill (top-right) */}
+        <span className="absolute top-3 right-3 bg-cad-electric/90 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-md font-medium">
+          {CATEGORY_ICONS[ep.category]} {CATEGORIES[ep.category].label}
+        </span>
+
         {/* Duration pill */}
         <span className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-md tabular-nums">
           {ep.duration}
@@ -555,7 +606,7 @@ function EpisodeCard({
         {/* Meta row */}
         <div className="flex items-center gap-1.5 mb-2.5">
           <span className="text-cad-light text-[10px] tracking-widest uppercase">
-            {ep.topics[0] || "Almennt"}
+            {CATEGORIES[ep.category].label}
           </span>
           <span className="text-white/30">·</span>
           <span className="text-white/50 text-[10px]">
@@ -571,7 +622,7 @@ function EpisodeCard({
         </Link>
 
         {/* Guest name(s) */}
-        <div className="mb-1.5">
+        <div className="mb-2">
           {ep.guests && ep.guests.length > 1 ? (
             ep.guests.map((g, i) => (
               <Fragment key={i}>
@@ -593,6 +644,20 @@ function EpisodeCard({
             </Link>
           )}
         </div>
+
+        {/* Tag chips */}
+        {ep.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {ep.tags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-cad-mid text-cad-light uppercase tracking-widest text-[10px] px-2 py-0.5 rounded"
+              >
+                {TAGS[tag].label}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Short description */}
         <p className="text-white/50 text-xs leading-relaxed line-clamp-2">
@@ -647,6 +712,10 @@ function EpisodeListItem({
             {formatDisplayDate(ep.date)}
           </span>
           <span className="text-white/30">·</span>
+          <span className="text-cad-electric/80 text-[10px] font-medium">
+            {CATEGORIES[ep.category].label}
+          </span>
+          <span className="text-white/30">·</span>
           <Link
             href={`/thaettir?gestur=${ep.guestSlug}`}
             className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-[10px] font-medium"
@@ -657,6 +726,19 @@ function EpisodeListItem({
         <Link href={`/thaettir/${ep.slug}`}>
           <h2 className="text-sm font-medium text-white truncate hover:text-cad-light transition-colors">{ep.title}</h2>
         </Link>
+        {/* Tag chips in list view */}
+        {ep.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {ep.tags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-cad-mid text-cad-light uppercase tracking-widest text-[9px] px-1.5 py-0.5 rounded"
+              >
+                {TAGS[tag].label}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Duration */}

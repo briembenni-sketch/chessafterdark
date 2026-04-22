@@ -1,5 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import { episodes as fallbackEpisodes } from "@/data/episodes";
+import { classifyEpisode, type Category, type Tag } from "@/lib/categorization";
 
 export interface Episode {
   number: number;
@@ -17,6 +18,8 @@ export interface Episode {
   spotifyEmbedUrl?: string;
   image: string;
   topics: string[];
+  category: Category;
+  tags: Tag[];
   guid: string;
 }
 
@@ -222,6 +225,12 @@ export async function fetchEpisodes(): Promise<Episode[]> {
       const shortDesc = makeShortDescription(desc);
       const guestInfo = extractGuest(title);
 
+      const { category, tags } = classifyEpisode({
+        title: cleaned,
+        description: desc,
+        guests: guestInfo.allGuests,
+      });
+
       return {
         number: epNum,
         slug: slugify(title),
@@ -238,6 +247,8 @@ export async function fetchEpisodes(): Promise<Episode[]> {
         audioUrl,
         image,
         topics: autoTagTopics(title, desc),
+        category,
+        tags,
         guid: String(
           (typeof item.guid === "object" && item.guid !== null
             ? (item.guid as Record<string, unknown>)["#text"]
@@ -251,6 +262,11 @@ export async function fetchEpisodes(): Promise<Episode[]> {
     // Fall back to static data
     return fallbackEpisodes.map((ep, idx) => {
       const guestName = ep.guests[0] || "";
+      const { category, tags } = classifyEpisode({
+        title: ep.title,
+        description: ep.description,
+        guests: ep.guests,
+      });
       return {
         number: ep.episodeNumber,
         slug: ep.slug,
@@ -264,6 +280,8 @@ export async function fetchEpisodes(): Promise<Episode[]> {
         audioUrl: "",
         image: ep.thumbnail || "/images/brand/cover-art.png",
         topics: ep.topics,
+        category,
+        tags,
         guid: `fallback-${idx}`,
       };
     });

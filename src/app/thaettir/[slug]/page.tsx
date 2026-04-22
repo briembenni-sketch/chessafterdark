@@ -5,6 +5,7 @@ import { fetchEpisodes } from "@/lib/rss";
 import EpisodePlayer from "@/components/EpisodePlayer";
 import { Calendar, Clock } from "lucide-react";
 import type { Metadata } from "next";
+import { CATEGORIES, TAGS } from "@/lib/categorization";
 
 export const revalidate = 3600;
 
@@ -112,24 +113,26 @@ export default async function EpisodePage({ params }: PageProps) {
           <EpisodePlayer episode={episode} />
         </div>
 
-        {/* Topics */}
-        {episode.topics.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-3">
-              Umræðuefni
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {episode.topics.map((topic) => (
-                <span
-                  key={topic}
-                  className="bg-cad-blue/10 text-cad-light text-sm px-3 py-1.5 rounded-lg"
-                >
-                  {topic}
-                </span>
-              ))}
-            </div>
+        {/* Category + Tags */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-2 items-center">
+            <Link
+              href={`/thaettir?flokkur=${episode.category}`}
+              className="bg-cad-electric text-white text-sm px-3 py-1.5 rounded-lg font-medium hover:bg-cad-electric/80 transition-colors"
+            >
+              {CATEGORIES[episode.category].label}
+            </Link>
+            {episode.tags.map((tag) => (
+              <Link
+                key={tag}
+                href={`/thaettir?tags=${tag}`}
+                className="bg-cad-mid text-cad-light uppercase tracking-widest text-[10px] px-2.5 py-1.5 rounded-lg hover:bg-cad-mid/80 transition-colors"
+              >
+                {TAGS[tag].label}
+              </Link>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
