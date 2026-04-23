@@ -1,7 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { fetchEpisodes } from "@/lib/rss";
-import { Music, Apple, MonitorPlay, Tv, Play, Calendar, Clock, ArrowRight, Camera } from "lucide-react";
+import { Play, Calendar, Clock, ArrowRight, ChevronRight } from "lucide-react";
+import {
+  SiSpotify, SiApplepodcasts, SiYoutube, SiTwitch, SiInstagram,
+} from "react-icons/si";
 import EpisodeImage from "@/components/EpisodeImage";
 import HeroSection from "@/components/HeroSection";
 import AnimatedSection from "@/components/AnimatedSection";
@@ -54,26 +57,35 @@ export default async function Home() {
         episodeCount={episodes.length}
       />
 
-      {/* 2. Platform Strip */}
-      <section className="py-10" style={{ backgroundColor: "#0f1f3d" }}>
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-3">
+      {/* 2. Social Row */}
+      <section className="py-12 border-t border-cad-electric/10">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="block w-[3px] h-4 bg-cad-electric" />
+            <span className="text-[11px] uppercase tracking-widest text-cad-light font-medium">
+              Hlustaðu & Fylgdu
+            </span>
+          </div>
+          <div className="flex items-center gap-10 flex-wrap">
             {[
-              { name: "Spotify", icon: Music, href: "https://open.spotify.com/show/1k1Ak6f8wFba3DzJzrNLTO" },
-              { name: "Apple Podcasts", icon: Apple, href: "https://podcasts.apple.com/is/podcast/chess-after-dark/id1592499624" },
-              { name: "YouTube", icon: MonitorPlay, href: "https://www.youtube.com/@chessafterdark7953" },
-              { name: "Twitch", icon: Tv, href: "https://twitch.tv/chessafterdark" },
-              { name: "Instagram", icon: Camera, href: "https://www.instagram.com/chessafterdark/" },
-            ].map((platform) => (
+              { name: "Spotify", url: "https://open.spotify.com/show/1k1Ak6f8wFba3DzJzrNLTO", Icon: SiSpotify },
+              { name: "Apple Podcasts", url: "https://podcasts.apple.com/is/podcast/chess-after-dark/id1592499624", Icon: SiApplepodcasts },
+              { name: "YouTube", url: "https://www.youtube.com/@chessafterdark7953", Icon: SiYoutube },
+              { name: "Twitch", url: "https://twitch.tv/chessafterdark", Icon: SiTwitch },
+              { name: "Instagram", url: "https://www.instagram.com/chessafterdark/", Icon: SiInstagram },
+            ].map(({ name, url, Icon }) => (
               <a
-                key={platform.name}
-                href={platform.href}
+                key={name}
+                href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-5 py-2.5 rounded-full transition-all text-sm hover:scale-[1.02]"
+                aria-label={`Chess After Dark á ${name}`}
+                className="group relative text-cad-light/60 hover:text-white transition-all duration-200 hover:scale-110"
               >
-                <platform.icon className="w-4 h-4" />
-                {platform.name}
+                <Icon className="w-7 h-7" />
+                <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest text-cad-light opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-medium">
+                  {name}
+                </span>
               </a>
             ))}
           </div>
@@ -90,28 +102,29 @@ export default async function Home() {
             </span>
           </div>
 
-          <div className="bg-gradient-to-r from-cad-electric/20 to-transparent p-px rounded-2xl mt-6">
+          <Link
+            href={`/thaettir/${latestEpisode.slug}`}
+            aria-label={`Skoða þátt: ${latestEpisode.title}`}
+            className="block bg-gradient-to-r from-cad-electric/20 to-transparent p-px rounded-2xl mt-6 group transition-all duration-200 hover:from-cad-electric/30"
+          >
             <div className="bg-cad-dark rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6">
               {/* Thumbnail */}
               <div className="md:w-64 shrink-0">
-                <div className="aspect-square rounded-xl overflow-hidden relative group">
+                <div className="aspect-square rounded-xl overflow-hidden relative">
                   <EpisodeImage
                     src={latestEpisode.image}
                     alt={latestEpisode.title}
                     fill
-                    className="object-cover object-center"
+                    className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
                   />
                   <span className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg font-medium">
                     #{latestEpisode.number}
                   </span>
                   {/* Play overlay on hover */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <Link
-                      href={`/thaettir/${latestEpisode.slug}`}
-                      className="w-12 h-12 bg-cad-electric hover:bg-cad-bright rounded-full flex items-center justify-center transition-colors"
-                    >
+                    <div className="w-12 h-12 bg-cad-electric rounded-full flex items-center justify-center">
                       <Play className="w-5 h-5 text-white fill-current ml-0.5" />
-                    </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -120,32 +133,38 @@ export default async function Home() {
               <div className="flex-1 flex flex-col justify-center">
                 {latestEpisode.topics.length > 0 && (
                   <span className="text-cad-light text-xs font-medium tracking-[0.2em] uppercase mb-2">
-                    ● {latestEpisode.topics[0]}
+                    {latestEpisode.topics[0]}
                   </span>
                 )}
-                <h2 className="text-2xl font-medium text-white mb-3">
+                <h2 className="text-2xl font-medium text-white mb-3 group-hover:text-cad-electric transition-colors">
                   {latestEpisode.title}
                 </h2>
                 <p className="text-white/75 text-sm leading-relaxed mb-4">
                   {latestEpisode.shortDescription}
                 </p>
-                <div className="flex items-center gap-4 text-white/50 text-sm">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4" />
-                    {new Date(latestEpisode.date).toLocaleDateString("is-IS", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4" />
-                    {latestEpisode.duration}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-white/50 text-sm">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(latestEpisode.date).toLocaleDateString("is-IS", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="w-4 h-4" />
+                      {latestEpisode.duration}
+                    </span>
+                  </div>
+                  <span className="flex items-center gap-1 text-[11px] uppercase tracking-widest text-cad-electric font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    Skoða þátt
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       </AnimatedSection>
 
@@ -193,7 +212,8 @@ export default async function Home() {
               <Link
                 key={ep.slug}
                 href={`/thaettir/${ep.slug}`}
-                className="group border border-white/10 hover:border-cad-electric/50 rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-1"
+                aria-label={`Skoða þátt: ${ep.title}`}
+                className="group border border-white/10 hover:border-cad-electric/40 rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cad-electric/5"
               >
                 {/* Thumbnail with play overlay */}
                 <div className={`aspect-video relative overflow-hidden bg-gradient-to-br ${cardGradients[idx % cardGradients.length]}`}>
@@ -201,7 +221,7 @@ export default async function Home() {
                     src={ep.image}
                     alt={ep.title}
                     fill
-                    className="object-cover object-center"
+                    className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
                   />
                   {/* Episode pill — top-left */}
                   <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-lg font-medium">
@@ -218,18 +238,24 @@ export default async function Home() {
                 <div className="p-5 bg-cad-dark">
                   {ep.topics.length > 0 && (
                     <span className="text-cad-light text-xs font-medium tracking-[0.2em] uppercase">
-                      ● {ep.topics[0]}
+                      {ep.topics[0]}
                     </span>
                   )}
-                  <h3 className="text-white font-medium mt-1 mb-2 group-hover:text-cad-light transition-colors">
+                  <h3 className="text-white font-medium mt-1 mb-2 group-hover:text-cad-electric transition-colors">
                     {ep.title}
                   </h3>
                   <p className="text-white/50 text-sm line-clamp-2">{ep.shortDescription}</p>
-                  {ep.guest && (
-                    <p className="text-cad-light text-xs mt-3">
-                      Gestur: {ep.guest}
-                    </p>
-                  )}
+                  <div className="flex items-center justify-between mt-3">
+                    {ep.guest && (
+                      <p className="text-cad-light text-xs">
+                        Gestur: {ep.guest}
+                      </p>
+                    )}
+                    <span className="flex items-center gap-1 text-[11px] uppercase tracking-widest text-cad-electric font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      Skoða þátt
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}

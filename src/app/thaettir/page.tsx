@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Fragment, Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 import type { Episode } from "@/lib/rss";
 import { CATEGORIES, CATEGORY_ORDER, type Category } from "@/lib/categorization";
 
@@ -489,12 +490,15 @@ function EpisodeCard({
   isPlaying: boolean;
   onPlay: (ep: Episode, e: React.MouseEvent) => void;
 }) {
+  const router = useRouter();
   const [imgError, setImgError] = useState(false);
   const isActive = playingGuid === ep.guid && isPlaying;
 
   return (
-    <div
-      className="group rounded-[14px] overflow-hidden transition-all duration-300 hover:-translate-y-[3px]"
+    <Link
+      href={`/thaettir/${ep.slug}`}
+      aria-label={`Skoða þátt: ${ep.title}`}
+      className="group block rounded-[14px] overflow-hidden transition-all duration-200 hover:-translate-y-[3px] hover:shadow-lg hover:shadow-cad-electric/5"
       style={{
         background: "#0f1f3d",
         border: "0.5px solid rgba(255,255,255,0.06)",
@@ -507,12 +511,12 @@ function EpisodeCard({
       }}
     >
       {/* Thumbnail */}
-      <Link href={`/thaettir/${ep.slug}`} className="block aspect-square relative overflow-hidden">
+      <div className="aspect-square relative overflow-hidden">
         <Image
           src={imgError ? "/images/brand/cover-art.png" : ep.image}
           alt={ep.title}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           onError={() => setImgError(true)}
         />
@@ -536,10 +540,10 @@ function EpisodeCard({
             }`}
             aria-label={`Spila ${ep.title}`}
           >
-            {isActive ? "&#x23F8;" : "&#x25B6;"}
+            {isActive ? "\u23F8" : "\u25B6"}
           </button>
         )}
-      </Link>
+      </div>
 
       {/* Body */}
       <div className="p-4">
@@ -548,40 +552,46 @@ function EpisodeCard({
           <span className="text-cad-light text-[11px] uppercase tracking-widest font-medium">
             {ep.categories.map((c) => CATEGORIES[c].label).join(" · ")}
           </span>
-          <span className="text-white/30">·</span>
+          <span className="text-white/30">&middot;</span>
           <span className="text-white/50 text-[10px]">
             {formatDisplayDate(ep.date)}
           </span>
         </div>
 
         {/* Title */}
-        <Link href={`/thaettir/${ep.slug}`}>
-          <h2 className="text-[15px] font-medium text-white leading-[1.35] mb-1.5 line-clamp-2 hover:text-cad-light transition-colors">
-            {ep.title}
-          </h2>
-        </Link>
+        <h2 className="text-[15px] font-medium text-white leading-[1.35] mb-1.5 line-clamp-2 group-hover:text-cad-electric transition-colors">
+          {ep.title}
+        </h2>
 
         {/* Guest name(s) */}
         <div className="mb-2">
           {ep.guests && ep.guests.length > 1 ? (
             ep.guests.map((g, i) => (
               <Fragment key={i}>
-                {i > 0 && <span className="text-white/30"> · </span>}
-                <Link
-                  href={`/thaettir?gestur=${ep.guestSlugs?.[i] || ep.guestSlug}`}
+                {i > 0 && <span className="text-white/30"> &middot; </span>}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/thaettir?gestur=${ep.guestSlugs?.[i] || ep.guestSlug}`);
+                  }}
                   className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-xs font-medium"
                 >
                   {g}
-                </Link>
+                </button>
               </Fragment>
             ))
           ) : (
-            <Link
-              href={`/thaettir?gestur=${ep.guestSlug}`}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(`/thaettir?gestur=${ep.guestSlug}`);
+              }}
               className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-xs font-medium"
             >
               {ep.guest}
-            </Link>
+            </button>
           )}
         </div>
 
@@ -589,8 +599,14 @@ function EpisodeCard({
         <p className="text-white/50 text-xs leading-relaxed line-clamp-2">
           {ep.shortDescription}
         </p>
+
+        {/* Hover CTA */}
+        <span className="flex items-center gap-1 mt-3 text-[11px] uppercase tracking-widest text-cad-electric font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+          Skoða þátt
+          <ChevronRight className="w-3.5 h-3.5" />
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -606,14 +622,23 @@ function EpisodeListItem({
   isPlaying: boolean;
   onPlay: (ep: Episode, e: React.MouseEvent) => void;
 }) {
+  const router = useRouter();
   const isActive = playingGuid === ep.guid && isPlaying;
 
   return (
-    <div
-      className="group flex items-center gap-4 rounded-xl p-4 transition-all duration-300 hover:bg-white/[0.03]"
+    <Link
+      href={`/thaettir/${ep.slug}`}
+      aria-label={`Skoða þátt: ${ep.title}`}
+      className="group flex items-center gap-4 rounded-xl p-4 transition-all duration-200 hover:bg-white/[0.03] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cad-electric/5"
       style={{
         background: "#0f1f3d",
         border: "0.5px solid rgba(255,255,255,0.06)",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,79,254,0.4)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)";
       }}
     >
       {/* Play button */}
@@ -623,7 +648,7 @@ function EpisodeListItem({
           className="w-10 h-10 bg-white/[0.06] hover:bg-cad-electric rounded-full flex items-center justify-center text-white text-xs flex-shrink-0 transition-colors"
           aria-label={`Spila ${ep.title}`}
         >
-          {isActive ? "&#x23F8;" : "&#x25B6;"}
+          {isActive ? "\u23F8" : "\u25B6"}
         </button>
       )}
 
@@ -633,31 +658,38 @@ function EpisodeListItem({
           <span className="text-cad-light text-[10px] tracking-widest uppercase">
             #{ep.number}
           </span>
-          <span className="text-white/30">·</span>
+          <span className="text-white/30">&middot;</span>
           <span className="text-white/50 text-[10px]">
             {formatDisplayDate(ep.date)}
           </span>
-          <span className="text-white/30">·</span>
+          <span className="text-white/30">&middot;</span>
           <span className="text-cad-electric/80 text-[10px] font-medium">
             {ep.categories.map((c) => CATEGORIES[c].label).join(" · ")}
           </span>
-          <span className="text-white/30">·</span>
-          <Link
-            href={`/thaettir?gestur=${ep.guestSlug}`}
+          <span className="text-white/30">&middot;</span>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/thaettir?gestur=${ep.guestSlug}`);
+            }}
             className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-[10px] font-medium"
           >
             {ep.guest}
-          </Link>
+          </button>
         </div>
-        <Link href={`/thaettir/${ep.slug}`}>
-          <h2 className="text-sm font-medium text-white truncate hover:text-cad-light transition-colors">{ep.title}</h2>
-        </Link>
+        <h2 className="text-sm font-medium text-white truncate group-hover:text-cad-electric transition-colors">{ep.title}</h2>
       </div>
 
-      {/* Duration */}
-      <span className="text-white/40 text-xs tabular-nums flex-shrink-0">
-        {ep.duration}
-      </span>
-    </div>
+      {/* Duration + hover CTA */}
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <span className="text-white/40 text-xs tabular-nums">
+          {ep.duration}
+        </span>
+        <span className="flex items-center gap-1 text-[11px] uppercase tracking-widest text-cad-electric font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+          <ChevronRight className="w-3.5 h-3.5" />
+        </span>
+      </div>
+    </Link>
   );
 }
