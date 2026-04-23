@@ -170,7 +170,13 @@ export default function HeroSection({
                   key={stat.label}
                   className="bg-cad-dark px-6 py-8 flex flex-col items-center justify-center text-center"
                 >
-                  <div className="text-4xl sm:text-5xl md:text-6xl font-mono font-medium text-white tracking-tight leading-none">
+                  <div
+                    className="text-4xl sm:text-5xl md:text-6xl font-medium text-white leading-none"
+                    style={{
+                      fontFeatureSettings: '"tnum" 1, "lnum" 1',
+                      fontVariantNumeric: 'tabular-nums lining-nums',
+                    }}
+                  >
                     {stat.value}
                   </div>
                   <div className="mt-3 text-[11px] uppercase tracking-widest text-cad-light font-medium">

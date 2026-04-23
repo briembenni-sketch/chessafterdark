@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, JetBrains_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,12 +9,6 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["500"],
-  variable: "--font-mono",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -58,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="is" className={`${geistSans.variable} ${jetbrainsMono.variable} antialiased`}>
+    <html lang="is" className={`${geistSans.variable} antialiased`}>
       <body className="min-h-screen flex flex-col">
         <Header />
         <main id="main-content" className="flex-1 pt-16 lg:pt-20">{children}</main>
