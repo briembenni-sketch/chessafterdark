@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { fetchEpisodes } from "@/lib/rss";
+import { CATEGORIES, CATEGORY_ORDER, countByCategory } from "@/lib/categorization";
 import { Play, Calendar, Clock, ArrowRight, ChevronRight } from "lucide-react";
 import {
   SiSpotify, SiApplepodcasts, SiYoutube, SiTwitch, SiInstagram,
@@ -26,20 +27,14 @@ export default async function Home() {
   const latestEpisode = episodes[0];
   const recentEpisodes = episodes.slice(1, 7);
 
-  // Build category counts from topics
-  const topicCounts: Record<string, number> = {};
-  for (const ep of episodes) {
-    for (const t of ep.topics) {
-      topicCounts[t] = (topicCounts[t] || 0) + 1;
-    }
-  }
-
-  const categories = [
-    { emoji: "⚽", name: "Knattspyrna", slug: "knattspyrna", count: topicCounts["Knattspyrna"] || 0 },
-    { emoji: "🏛️", name: "Pólitík", slug: "politik", count: topicCounts["Pólitík"] || 0 },
-    { emoji: "💼", name: "Viðskipti", slug: "vidskipti", count: topicCounts["Viðskipti"] || 0 },
-    { emoji: "♟️", name: "Skák", slug: "skak", count: topicCounts["Skák"] || 0 },
-  ];
+  // Build category counts from the canonical categorization system
+  const counts = countByCategory(episodes);
+  const categoryCards = CATEGORY_ORDER.map((cat) => ({
+    key: cat,
+    label: CATEGORIES[cat].label,
+    count: counts[cat],
+    href: `/thaettir?flokkur=${cat}`,
+  }));
 
   // Find upcoming event within 30 days
   const now = new Date();
@@ -171,26 +166,36 @@ export default async function Home() {
       {/* 4. Categories (Flokkar) */}
       <AnimatedSection className="bg-cad-dark py-20 md:py-20">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-1 h-8 bg-cad-electric rounded-full" />
-            <span className="text-xs font-medium tracking-[0.2em] uppercase text-white/60">
-              Flokkar
-            </span>
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="block w-[3px] h-4 bg-cad-electric" />
+              <span className="text-[11px] uppercase tracking-widest text-cad-light font-medium">
+                Flokkar
+              </span>
+            </div>
+            <h2 className="text-3xl font-medium text-white">
+              Skoðaðu eftir efni
+            </h2>
           </div>
-          <h2 className="text-2xl font-medium text-white mb-8 ml-4">
-            Skoðaðu eftir efni
-          </h2>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {categories.map((cat) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {categoryCards.map((card) => (
               <Link
-                key={cat.name}
-                href={`/thaettir?flokkur=${cat.slug}`}
-                className="bg-cad-electric/10 border border-cad-electric/30 hover:bg-[rgba(0,79,254,0.15)] hover:border-[rgba(0,79,254,0.5)] rounded-2xl p-5 transition-all duration-300 group hover:-translate-y-[2px] focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:ring-offset-2 focus-visible:ring-offset-cad-dark focus-visible:outline-none"
+                key={card.key}
+                href={card.href}
+                className="group block p-6 rounded-xl bg-cad-mid border border-cad-electric/10 hover:border-cad-electric/40 hover:-translate-y-0.5 hover:bg-cad-mid/80 transition-all"
               >
-                <span className="text-3xl mb-3 block">{cat.emoji}</span>
-                <h3 className="text-white font-medium mb-1">{cat.name}</h3>
-                <p className="text-white/50 text-sm">{cat.count} þættir</p>
+                <div className="flex items-baseline justify-between mb-1">
+                  <h3 className="text-lg font-medium text-white group-hover:text-cad-electric transition-colors">
+                    {card.label}
+                  </h3>
+                  <span className="text-2xl font-medium text-cad-light/40 group-hover:text-cad-electric/80 transition-colors tabular-nums">
+                    {card.count}
+                  </span>
+                </div>
+                <p className="text-[11px] uppercase tracking-widest text-cad-light/60 font-medium">
+                  Þættir
+                </p>
               </Link>
             ))}
           </div>
