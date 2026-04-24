@@ -91,3 +91,33 @@ body {
 .styled-audio::-webkit-media-controls-time-remaining-display {
   color: white;
 }
+
+/* Episode description prose */
+.episode-prose {
+  @apply text-cad-light/90 leading-relaxed mb-8;
+}
+
+.episode-prose p {
+  @apply mb-5 text-base leading-relaxed;
+}
+
+.episode-prose .episode-section-header {
+  @apply mt-10 mb-4 text-white font-medium text-lg;
+}
+
+.episode-prose ul {
+  @apply mb-8 pl-0 list-none;
+}
+
+.episode-prose ul > li {
+  @apply pl-5 relative text-cad-light/90 leading-relaxed mb-2;
+}
+
+.episode-prose ul > li::before {
+  content: "•";
+  @apply absolute left-0 text-cad-electric;
+}
+
+.episode-prose .episode-section-header + ul {
+  @apply mt-3;
+}

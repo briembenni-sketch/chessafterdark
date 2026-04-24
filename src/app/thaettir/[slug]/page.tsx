@@ -6,6 +6,7 @@ import EpisodePlayer from "@/components/EpisodePlayer";
 import { Calendar, Clock } from "lucide-react";
 import type { Metadata } from "next";
 import { CATEGORIES } from "@/lib/categorization";
+import { formatEpisodeDescription } from "@/lib/formatters";
 
 export const revalidate = 3600;
 
@@ -106,7 +107,10 @@ export default async function EpisodePage({ params }: PageProps) {
           </Link>
         </div>
 
-        <div className="whitespace-pre-line text-muted text-lg mb-8">{episode.description}</div>
+        <div
+          className="episode-prose"
+          dangerouslySetInnerHTML={{ __html: formatEpisodeDescription(episode.description) }}
+        />
 
         {/* Episode Player */}
         <div className="mb-8">
