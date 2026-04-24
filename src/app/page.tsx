@@ -183,19 +183,20 @@ export default async function Home() {
               <Link
                 key={card.key}
                 href={card.href}
-                className="group block p-6 rounded-xl bg-cad-mid border border-cad-electric/10 hover:border-cad-electric/40 hover:-translate-y-0.5 hover:bg-cad-mid/80 transition-all"
+                className="group relative block overflow-hidden rounded-xl bg-cad-mid border border-cad-electric/10 hover:border-cad-electric/40 hover:-translate-y-0.5 transition-all aspect-[4/5] sm:aspect-[3/4]"
               >
-                <div className="flex items-baseline justify-between mb-1">
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8rem] sm:text-[6rem] lg:text-[7rem] font-medium text-cad-electric/[0.07] group-hover:text-cad-electric/[0.15] transition-colors duration-500 select-none leading-none tabular-nums">
+                  {card.count}
+                </span>
+                <div className="absolute inset-x-0 bottom-0 p-5">
+                  <p className="text-[11px] uppercase tracking-widest text-cad-light/50 font-medium mb-1">
+                    {card.count} þættir
+                  </p>
                   <h3 className="text-lg font-medium text-white group-hover:text-cad-electric transition-colors">
                     {card.label}
                   </h3>
-                  <span className="text-2xl font-medium text-cad-light/40 group-hover:text-cad-electric/80 transition-colors tabular-nums">
-                    {card.count}
-                  </span>
                 </div>
-                <p className="text-[11px] uppercase tracking-widest text-cad-light/60 font-medium">
-                  Þættir
-                </p>
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-cad-electric scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
               </Link>
             ))}
           </div>
