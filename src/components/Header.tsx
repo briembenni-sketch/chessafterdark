@@ -62,18 +62,29 @@ function Logo({ small = false }: { small?: boolean }) {
 export default function Header() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    let ticking = false;
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const update = () => {
+      setScrolled(window.scrollY > 20);
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    };
+
+    // Set initial state via rAF (handles page loads mid-scroll)
+    window.requestAnimationFrame(update);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -100,16 +111,18 @@ export default function Header() {
   }, [handleEsc]);
 
   // Close menu on route change
+  const prevPathname = useRef(pathname);
   useEffect(() => {
-    setIsOpen(false);
+    if (prevPathname.current !== pathname) {
+      prevPathname.current = pathname;
+      window.requestAnimationFrame(() => setIsOpen(false));
+    }
   }, [pathname]);
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href;
     return pathname === href || pathname.startsWith(href + "/");
   }
-
-  const showScrolled = mounted && scrolled;
 
   return (
     <>
@@ -123,43 +136,14 @@ export default function Header() {
 
       {/* ── Desktop header ── */}
       <header
-        className="hidden lg:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out"
-        style={
-          showScrolled
-            ? {
-                top: 16,
-                left: "50%",
-                right: "auto",
-                transform: "translateX(-50%)",
-                width: "calc(100% - 48px)",
-                maxWidth: 1200,
-                background: "rgba(10,20,40,0.75)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                border: "0.5px solid rgba(255,255,255,0.08)",
-                borderRadius: 16,
-                padding: "14px 24px",
-                boxShadow: "0 4px 32px rgba(0,0,0,0.3)",
-              }
-            : {
-                top: 0,
-                left: 0,
-                right: 0,
-                transform: "none",
-                width: "100%",
-                maxWidth: "none",
-                background: "transparent",
-                backdropFilter: "none",
-                WebkitBackdropFilter: "none",
-                border: "none",
-                borderBottom: "0.5px solid rgba(255,255,255,0.05)",
-                borderRadius: 0,
-                padding: "18px 24px",
-                boxShadow: "none",
-              }
-        }
+        className={`hidden lg:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out border-b ${
+          scrolled
+            ? "bg-cad-dark/85 backdrop-blur-md border-cad-electric/10 shadow-lg shadow-cad-dark/20"
+            : "bg-transparent border-white/5"
+        }`}
+        style={{ willChange: "background-color, backdrop-filter" }}
       >
-        <div className="flex items-center justify-between max-w-[1200px] mx-auto">
+        <div className="flex items-center justify-between max-w-7xl mx-auto px-6 h-16">
           {/* Left — Logo */}
           <Logo />
 
@@ -189,9 +173,7 @@ export default function Header() {
           {/* Right — CTA */}
           <Link
             href="/thaettir"
-            className={`inline-flex items-center gap-1.5 bg-cad-electric text-white rounded-[10px] text-[13px] font-medium hover:bg-cad-blue hover:-translate-y-px transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:ring-offset-2 focus-visible:ring-offset-cad-dark ${
-              showScrolled ? "px-4 py-2" : "px-[18px] py-[9px]"
-            }`}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-cad-electric text-white rounded-[10px] text-[13px] font-medium hover:bg-cad-blue hover:-translate-y-px transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cad-electric focus-visible:ring-offset-2 focus-visible:ring-offset-cad-dark"
           >
             <svg
               viewBox="0 0 12 14"
@@ -206,7 +188,7 @@ export default function Header() {
       </header>
 
       {/* ── Mobile header ── */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[18px] py-3.5 bg-[rgba(10,20,40,0.9)] backdrop-blur-xl border-b border-white/[0.06]">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[18px] h-16 bg-[rgba(10,20,40,0.9)] backdrop-blur-xl border-b border-white/[0.06]">
         <Logo small />
 
         <div className="flex items-center gap-2">
@@ -270,7 +252,7 @@ export default function Header() {
             transition={{ duration: 0.25, ease: "easeOut" }}
           >
             {/* Drawer header */}
-            <div className="flex items-center justify-between px-[18px] py-3.5 border-b border-white/[0.06]">
+            <div className="flex items-center justify-between px-[18px] h-16 border-b border-white/[0.06]">
               <Logo small />
               <div className="flex items-center gap-2">
                 <Link
