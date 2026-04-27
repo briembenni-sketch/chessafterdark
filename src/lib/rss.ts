@@ -1,6 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import { episodes as fallbackEpisodes } from "@/data/episodes";
-import { classifyEpisode, countChessMentions, type Category } from "@/lib/categorization";
+import { classifyEpisode, countByCategory, countChessMentions, type Category } from "@/lib/categorization";
 
 export interface Episode {
   number: number;
@@ -259,8 +259,14 @@ export async function fetchEpisodes(): Promise<Episode[]> {
       };
     });
 
+    const counts = countByCategory(mapped);
+    console.log(`[categorization] Episode distribution (${mapped.length} total):`);
+    console.log(`  Knattspyrna: ${counts.knattspyrna}`);
+    console.log(`  Pólitík:     ${counts.politik}`);
+    console.log(`  Skák:        ${counts.skak}`);
+    console.log(`  Viðskipti:   ${counts.vidskipti}`);
+    console.log(`  Annað:       ${counts.annad}`);
     const skakEpisodes = mapped.filter(e => e.categories.includes("skak"));
-    console.log(`[categorization] Skák category: ${skakEpisodes.length} episodes`);
     console.log(`[categorization] Skák titles:`);
     skakEpisodes.forEach(e => {
       const mentions = countChessMentions(`${e.title} ${e.description}`.toLowerCase());
