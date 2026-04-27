@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Fragment, Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 import type { Episode } from "@/lib/rss";
 import { CATEGORIES, CATEGORY_ORDER, type Category } from "@/lib/categorization";
 
@@ -95,13 +95,6 @@ function ThaettirContent() {
   const [search, setSearch] = useState("");
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("cad-view-mode");
-      if (saved === "list" || saved === "grid") return saved;
-    }
-    return "grid";
-  });
 
   // Audio player state
   const [playingEp, setPlayingEp] = useState<Episode | null>(null);
@@ -118,6 +111,16 @@ function ThaettirContent() {
     flokkurParam && CATEGORY_ORDER.includes(flokkurParam as Category)
       ? (flokkurParam as Category)
       : null;
+
+  type SortMode = "nyjast" | "elst" | "mest-hlustad";
+  const SORT_OPTIONS: { value: SortMode; label: string; disabled?: boolean; tooltip?: string }[] = [
+    { value: "nyjast", label: "Nýjast fyrst" },
+    { value: "elst", label: "Elst fyrst" },
+    { value: "mest-hlustad", label: "Mest hlustað", disabled: true, tooltip: "Ekki tiltækt" },
+  ];
+  const radunParam = searchParams.get("radun");
+  const activeSort: SortMode =
+    radunParam === "elst" ? "elst" : "nyjast";
 
   useEffect(() => {
     fetch("/api/episodes")
@@ -207,16 +210,26 @@ function ThaettirContent() {
     }
   }, []);
 
-  const toggleView = (mode: "grid" | "list") => {
-    setViewMode(mode);
-    localStorage.setItem("cad-view-mode", mode);
-  };
-
-  // Build URL from filter state
-  function pushFilterUrl(cat: Category | null, guest: string | null) {
+  // Build URL from filter state (preserves all active params)
+  function buildParams(overrides: { flokkur?: string | null; gestur?: string | null; radun?: string | null }) {
     const params = new URLSearchParams();
+    const cat = overrides.flokkur !== undefined ? overrides.flokkur : flokkurParam;
+    const guest = overrides.gestur !== undefined ? overrides.gestur : guestFilter;
+    const sort = overrides.radun !== undefined ? overrides.radun : radunParam;
     if (cat) params.set("flokkur", cat);
     if (guest) params.set("gestur", guest);
+    if (sort && sort !== "nyjast") params.set("radun", sort);
+    return params;
+  }
+
+  function pushFilterUrl(cat: Category | null, guest: string | null) {
+    const params = buildParams({ flokkur: cat, gestur: guest });
+    const qs = params.toString();
+    router.push(qs ? `/thaettir?${qs}` : "/thaettir", { scroll: false });
+  }
+
+  function handleSortChange(sort: SortMode) {
+    const params = buildParams({ radun: sort });
     const qs = params.toString();
     router.push(qs ? `/thaettir?${qs}` : "/thaettir", { scroll: false });
   }
@@ -249,6 +262,14 @@ function ThaettirContent() {
     return matchesSearch && matchesCategory && matchesGuest;
   });
 
+  // Apply sort after filtering
+  const sorted = [...filtered].sort((a, b) => {
+    if (activeSort === "elst") return new Date(a.date).getTime() - new Date(b.date).getTime();
+    // Default: nyjast (newest first) — episodes already come sorted by number desc,
+    // but use date for consistency
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
+
   const pageTitle = guestFilter
     ? `Þættir með ${getGuestDisplayName(guestFilter)}`
     : activeCategory
@@ -278,27 +299,19 @@ function ThaettirContent() {
             <h1 className="text-4xl font-medium text-white mb-2">{pageTitle}</h1>
             <p className="text-white/55 text-sm">{pageSubtitle}</p>
           </div>
-          <div className="flex bg-white/5 p-1 rounded-lg">
-            <button
-              onClick={() => toggleView("grid")}
-              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
-                viewMode === "grid"
-                  ? "bg-cad-electric text-white"
-                  : "text-white/50 hover:text-white/70"
-              }`}
+          <div className="relative">
+            <select
+              value={activeSort}
+              onChange={(e) => handleSortChange(e.target.value as SortMode)}
+              className="h-10 appearance-none bg-cad-mid text-cad-light text-sm rounded-full pl-4 pr-9 border-none focus:outline-none focus:ring-1 focus:ring-cad-electric cursor-pointer hover:bg-cad-mid/80 transition-colors"
             >
-              Grid
-            </button>
-            <button
-              onClick={() => toggleView("list")}
-              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
-                viewMode === "list"
-                  ? "bg-cad-electric text-white"
-                  : "text-white/50 hover:text-white/70"
-              }`}
-            >
-              Listi
-            </button>
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} disabled={opt.disabled}>
+                  {opt.label}{opt.disabled ? " — Ekki tiltækt" : ""}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cad-light pointer-events-none" />
           </div>
         </div>
       </section>
@@ -390,33 +403,17 @@ function ThaettirContent() {
       )}
 
       {/* ─── EPISODE GRID ─── */}
-      {!loading && filtered.length > 0 && (
+      {!loading && sorted.length > 0 && (
         <section className="px-8 pb-12">
-          <div
-            className={`max-w-6xl mx-auto ${
-              viewMode === "grid"
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-                : "flex flex-col gap-3"
-            }`}
-          >
-            {filtered.map((ep) => (
-              viewMode === "grid" ? (
-                <EpisodeCard
-                  key={ep.guid}
-                  ep={ep}
-                  playingGuid={playingEp?.guid}
-                  isPlaying={isPlaying}
-                  onPlay={handlePlay}
-                />
-              ) : (
-                <EpisodeListItem
-                  key={ep.guid}
-                  ep={ep}
-                  playingGuid={playingEp?.guid}
-                  isPlaying={isPlaying}
-                  onPlay={handlePlay}
-                />
-              )
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sorted.map((ep) => (
+              <EpisodeCard
+                key={ep.guid}
+                ep={ep}
+                playingGuid={playingEp?.guid}
+                isPlaying={isPlaying}
+                onPlay={handlePlay}
+              />
             ))}
           </div>
         </section>
@@ -658,86 +655,3 @@ function EpisodeCard({
   );
 }
 
-/* ─── EPISODE LIST ITEM (List View) ─── */
-function EpisodeListItem({
-  ep,
-  playingGuid,
-  isPlaying,
-  onPlay,
-}: {
-  ep: Episode;
-  playingGuid?: string;
-  isPlaying: boolean;
-  onPlay: (ep: Episode, e: React.MouseEvent) => void;
-}) {
-  const router = useRouter();
-  const isActive = playingGuid === ep.guid && isPlaying;
-
-  return (
-    <Link
-      href={`/thaettir/${ep.slug}`}
-      aria-label={`Skoða þátt: ${ep.title}`}
-      className="group flex items-center gap-4 rounded-xl p-4 transition-all duration-200 hover:bg-white/[0.03] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cad-electric/5"
-      style={{
-        background: "#0f1f3d",
-        border: "0.5px solid rgba(255,255,255,0.06)",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,79,254,0.4)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)";
-      }}
-    >
-      {/* Play button */}
-      {ep.audioUrl && (
-        <button
-          onClick={(e) => onPlay(ep, e)}
-          className="w-10 h-10 bg-white/[0.06] hover:bg-cad-electric rounded-full flex items-center justify-center text-white text-xs flex-shrink-0 transition-colors"
-          aria-label={`Spila ${ep.title}`}
-        >
-          {isActive ? "\u23F8" : "\u25B6"}
-        </button>
-      )}
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-cad-light text-[10px] tracking-widest uppercase">
-            #{ep.number}
-          </span>
-          <span className="text-white/30">&middot;</span>
-          <span className="text-white/50 text-[10px]">
-            {formatDisplayDate(ep.date)}
-          </span>
-          <span className="text-white/30">&middot;</span>
-          <span className="text-cad-electric/80 text-[10px] font-medium">
-            {ep.categories.map((c) => CATEGORIES[c].label).join(" · ")}
-          </span>
-          <span className="text-white/30">&middot;</span>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              router.push(`/thaettir?gestur=${ep.guestSlug}`);
-            }}
-            className="text-cad-light hover:text-white transition-colors hover:underline underline-offset-2 decoration-dotted text-[10px] font-medium"
-          >
-            {ep.guest}
-          </button>
-        </div>
-        <h2 className="text-sm font-medium text-white truncate group-hover:text-cad-electric transition-colors">{ep.title}</h2>
-      </div>
-
-      {/* Duration + hover CTA */}
-      <div className="flex items-center gap-3 flex-shrink-0">
-        <span className="text-white/40 text-xs tabular-nums">
-          {ep.duration}
-        </span>
-        <span className="flex items-center gap-1 text-[11px] uppercase tracking-widest text-cad-electric font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-          <ChevronRight className="w-3.5 h-3.5" />
-        </span>
-      </div>
-    </Link>
-  );
-}
