@@ -112,11 +112,10 @@ function ThaettirContent() {
       ? (flokkurParam as Category)
       : null;
 
-  type SortMode = "nyjast" | "elst" | "mest-hlustad";
-  const SORT_OPTIONS: { value: SortMode; label: string; disabled?: boolean; tooltip?: string }[] = [
+  type SortMode = "nyjast" | "elst";
+  const SORT_OPTIONS: { value: SortMode; label: string }[] = [
     { value: "nyjast", label: "Nýjast fyrst" },
     { value: "elst", label: "Elst fyrst" },
-    { value: "mest-hlustad", label: "Mest hlustað", disabled: true, tooltip: "Ekki tiltækt" },
   ];
   const radunParam = searchParams.get("radun");
   const activeSort: SortMode =
@@ -306,8 +305,8 @@ function ThaettirContent() {
               className="h-10 appearance-none bg-cad-mid text-cad-light text-sm rounded-full pl-4 pr-9 border-none focus:outline-none focus:ring-1 focus:ring-cad-electric cursor-pointer hover:bg-cad-mid/80 transition-colors"
             >
               {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value} disabled={opt.disabled}>
-                  {opt.label}{opt.disabled ? " — Ekki tiltækt" : ""}
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
                 </option>
               ))}
             </select>
