@@ -125,7 +125,7 @@ export default function HeroSection({
               animate="visible"
               custom={0.3}
             >
-              Hlaðvarp um knattspyrnu, fjármál, pólitík og margt fleira.
+              Málalengingar um fjármál, þjóðmál, íþróttir og önnur mál sem skipta máli á mannamáli.
             </motion.p>
 
             {/* CTAs */}
@@ -168,7 +168,7 @@ export default function HeroSection({
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="bg-cad-dark px-6 py-8 flex flex-col items-center justify-center text-center"
+                  className="bg-cad-dark px-6 py-8 flex flex-col items-center text-center"
                 >
                   <div
                     className="text-4xl sm:text-5xl md:text-6xl font-medium text-white leading-none"
