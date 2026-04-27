@@ -164,9 +164,9 @@ export default async function Home() {
       </AnimatedSection>
 
       {/* 4. Categories (Flokkar) */}
-      <AnimatedSection className="bg-cad-dark py-20 md:py-20">
+      <AnimatedSection className="bg-cad-dark py-14 md:py-14">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="mb-8">
+          <div className="mb-6">
             <div className="flex items-center gap-3 mb-3">
               <span className="block w-[3px] h-4 bg-cad-electric" />
               <span className="text-[11px] uppercase tracking-widest text-cad-light font-medium">
@@ -178,21 +178,18 @@ export default async function Home() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {categoryCards.map((card) => (
               <Link
                 key={card.key}
                 href={card.href}
-                className="group relative block overflow-hidden rounded-xl bg-cad-mid border border-cad-electric/10 hover:border-cad-electric/40 hover:-translate-y-0.5 transition-all aspect-[4/5] sm:aspect-[3/4]"
+                className="group relative block overflow-hidden rounded-xl bg-cad-mid border border-cad-electric/10 hover:border-cad-electric/40 hover:-translate-y-0.5 transition-all h-44"
               >
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8rem] sm:text-[6rem] lg:text-[7rem] font-medium text-cad-electric/[0.07] group-hover:text-cad-electric/[0.15] transition-colors duration-500 select-none leading-none tabular-nums">
-                  {card.count}
+                <span className="absolute top-4 right-4 text-cad-light text-xs font-medium uppercase tracking-widest">
+                  {card.count} þættir
                 </span>
                 <div className="absolute inset-x-0 bottom-0 p-5">
-                  <p className="text-[11px] uppercase tracking-widest text-cad-light/50 font-medium mb-1">
-                    {card.count} þættir
-                  </p>
-                  <h3 className="text-lg font-medium text-white group-hover:text-cad-electric transition-colors">
+                  <h3 className="text-2xl font-medium text-white group-hover:text-cad-electric transition-colors">
                     {card.label}
                   </h3>
                 </div>
