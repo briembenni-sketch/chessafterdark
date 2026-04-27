@@ -49,6 +49,8 @@ export default async function Home() {
       {/* 1. Hero Section */}
       <HeroSection
         latestEpisodeSlug={latestEpisode.slug}
+        latestEpisodeNumber={latestEpisode.number}
+        latestEpisodeGuest={latestEpisode.guest}
         episodeCount={episodes.length}
       />
 

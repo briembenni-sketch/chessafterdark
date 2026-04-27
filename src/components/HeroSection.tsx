@@ -16,9 +16,13 @@ const fadeInUp = {
 
 export default function HeroSection({
   latestEpisodeSlug,
+  latestEpisodeNumber,
+  latestEpisodeGuest,
   episodeCount,
 }: {
   latestEpisodeSlug: string;
+  latestEpisodeNumber: number;
+  latestEpisodeGuest: string;
   episodeCount: number;
 }) {
   return (
@@ -78,10 +82,17 @@ export default function HeroSection({
                   priority
                 />
                 {/* Floating pill */}
-                <div className="absolute bottom-4 right-4 bg-cad-electric text-white text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                  Þáttur #{episodeCount} nýr
-                </div>
+                <Link
+                  href={`/thaettir/${latestEpisodeSlug}`}
+                  className="absolute bottom-4 right-4 bg-cad-electric text-white text-xs px-3 py-1.5 rounded-full flex flex-col items-center text-center cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-lg"
+                >
+                  <span className="font-medium">Þáttur #{latestEpisodeNumber}</span>
+                  {latestEpisodeGuest ? (
+                    <span className="text-[10px] text-white/80 leading-tight">{latestEpisodeGuest}</span>
+                  ) : (
+                    <span className="text-[10px] text-white/80 leading-tight">nýr</span>
+                  )}
+                </Link>
               </div>
             </div>
           </motion.div>
