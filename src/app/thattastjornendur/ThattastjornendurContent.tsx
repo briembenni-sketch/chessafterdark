@@ -22,26 +22,26 @@ const fadeUp = {
 function getHosts(displayCount: number) {
   return [
     {
-      name: "Birkir Karl Sigur\ðsson",
-      label: "STJ\ÓRNANDI 01",
-      role: "STOFNANDI \· \Þ\ÁTTASTJ\ÓRNANDI",
+      name: "Birkir Karl Sigurðsson",
+      label: "STJÓRNANDI 01",
+      role: "STOFNANDI · ÞÁTTASTJÓRNANDI",
       image: "/images/hosts/birkir-blue.png",
-      bio: "Birkir Karl er annar stofnandi Chess After Dark og hefur st\ýrt \þ\ættinum me\ð Leifi fr\á 2019. K\ópavogsb\úi sem starfar \í vi\ðskiptal\ífinu og lifir og hr\ærist \í umr\æ\ðunni um p\ólit\ík, efnahags\ál og \íslenska knattspyrnu. Birkir er \þekktur fyrir \óhr\æddar spurningar og a\ð draga fram hli\ðar \á gestum sem sjaldnast f\ást annars sta\ðar.",
+      bio: "Birkir Karl er annar stofnandi Chess After Dark og hefur stýrt þættinum með Leifi frá 2019. Kópavogsbúi sem starfar í viðskiptalífinu og lifir og hrærist í umræðunni um pólitík, efnahagsmál og íslenska knattspyrnu. Birkir er þekktur fyrir óhræddar spurningar og að draga fram hliðar á gestum sem sjaldnast fást annars staðar.",
       stats: [
-        { value: `${displayCount}+`, label: "\þ\ættir" },
-        { value: "2019", label: "s\í\ðan" },
+        { value: `${displayCount}+`, label: "þættir" },
+        { value: "2019", label: "síðan" },
       ],
       social: { instagram: "https://www.instagram.com/chessafterdark/" },
     },
     {
-      name: "Leifur \Þorsteinsson",
-      label: "STJ\ÓRNANDI 02",
-      role: "STOFNANDI \· \Þ\ÁTTASTJ\ÓRNANDI",
+      name: "Leifur Þorsteinsson",
+      label: "STJÓRNANDI 02",
+      role: "STOFNANDI · ÞÁTTASTJÓRNANDI",
       image: "/images/hosts/leifur-blue.png",
-      bio: "Leifur stofna\ði Chess After Dark me\ð Birki \ári\ð 2019. Hugmyndin var upphaflega myndhla\ðvarp \þar sem gestir tefldu \á me\ðan \þeir sv\öru\ðu spurningum, enda ekki \á allra manna f\æri a\ð tefla me\ðan \þeir eru spur\ðir spj\örunum \úr. \Í dag starfar Leifur sem vi\ðskiptastj\óri hj\á CreditInfo.",
+      bio: "Leifur stofnaði Chess After Dark með Birki árið 2019. Hugmyndin var upphaflega myndhlaðvarp þar sem gestir tefldu á meðan þeir svöruðu spurningum, enda ekki á allra manna færi að tefla meðan þeir eru spurðir spjörunum úr. Í dag starfar Leifur sem viðskiptastjóri hjá CreditInfo.",
       stats: [
-        { value: `${displayCount}+`, label: "\þ\ættir" },
-        { value: "2019", label: "s\í\ðan" },
+        { value: `${displayCount}+`, label: "þættir" },
+        { value: "2019", label: "síðan" },
       ],
       social: { instagram: "https://www.instagram.com/leifmeister13/" },
     },
@@ -66,14 +66,14 @@ export default function ThattastjornendurContent({ displayCount }: { displayCoun
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <p className="text-cad-light text-xs tracking-widest uppercase mb-4">
-          F\ÓLKI\Ð \Á BAK VI\Ð HLA\ÐVARPI\Ð
+          FÓLKIÐ Á BAK VIÐ HLAÐVARPIÐ
         </p>
         <h1 className="text-4xl md:text-5xl font-medium text-white mb-4">
-          \Þ\áttastj\órnendur
+          Þáttastjórnendur
         </h1>
         <p className="text-white/60 leading-relaxed max-w-[520px] mx-auto">
-          Birkir Karl og Leifur hafa st\ýrt Chess After Dark s\í\ðan 2019. Saman
-          hafa \þeir byggt upp eitt vins\ælasta hla\ðvarp landsins.
+          Birkir Karl og Leifur hafa stýrt Chess After Dark síðan 2019. Saman
+          hafa þeir byggt upp eitt vinsælasta hlaðvarp landsins.
         </p>
       </motion.section>
 
@@ -98,7 +98,7 @@ export default function ThattastjornendurContent({ displayCount }: { displayCoun
               <div className="aspect-square relative overflow-hidden group">
                 <Image
                   src={host.image}
-                  alt={`${host.name}, \þ\áttastj\órnandi Chess After Dark`}
+                  alt={`${host.name}, þáttastjórnandi Chess After Dark`}
                   fill
                   className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
                 />
@@ -135,17 +135,17 @@ export default function ThattastjornendurContent({ displayCount }: { displayCoun
                     href={host.social.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`${host.name} \á Instagram`}
+                    aria-label={`${host.name} á Instagram`}
                     className="w-9 h-9 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-colors"
                   >
                     <InstagramIcon className="w-4 h-4" />
                   </a>
                   {/* Chess icon */}
                   <span
-                    aria-label="Sk\ák"
+                    aria-label="Skák"
                     className="w-9 h-9 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center text-white/50 text-sm"
                   >
-                    \♟
+                    ♟
                   </span>
                 </div>
               </div>
@@ -154,7 +154,7 @@ export default function ThattastjornendurContent({ displayCount }: { displayCoun
         </div>
       </section>
 
-      {/* SECTION 3: Um hla\ðvarpi\ð */}
+      {/* SECTION 3: Um hlaðvarpið */}
       <motion.section
         className="bg-cad-mid py-16 md:py-20 px-5 md:px-8"
         initial="hidden"
@@ -168,7 +168,7 @@ export default function ThattastjornendurContent({ displayCount }: { displayCoun
           <div className="aspect-square relative rounded-[20px] overflow-hidden">
             <Image
               src="/images/hosts/both-blue.png"
-              alt="Birkir Karl og Leifur \Þorsteinsson saman"
+              alt="Birkir Karl og Leifur Þorsteinsson saman"
               fill
               className="object-cover"
             />
@@ -177,22 +177,22 @@ export default function ThattastjornendurContent({ displayCount }: { displayCoun
           {/* Text */}
           <div>
             <p className="text-cad-light text-xs tracking-widest uppercase mb-3">
-              UM HLA\ÐVARPI\Ð
+              UM HLAÐVARPIÐ
             </p>
             <h2 className="text-2xl md:text-3xl font-medium text-white leading-tight mb-6">
-              Fr\á 2019 hafa Birkir og Leifur fengi\ð \áhugaver\ða gesti \í spjall.
+              Frá 2019 hafa Birkir og Leifur fengið áhugaverða gesti í spjall.
             </h2>
             <p className="text-white/70 mb-4 leading-relaxed">
-              \Í \þ\áttunum leyfa \þeir gestum a\ð spreyta sig \á sk\ákbor\ðinu me\ðan
-              \þeir spyrja \þ\á spj\örunum \úr um knattspyrnu, fj\árm\ál, p\ólit\ík og
+              Í þáttunum leyfa þeir gestum að spreyta sig á skákborðinu meðan
+              þeir spyrja þá spjörunum úr um knattspyrnu, fjármál, pólitík og
               margt fleira.
             </p>
             <p className="text-white/70 mb-6 leading-relaxed">
-              Hla\ðvarpi\ð hefur or\ði\ð eitt vins\ælasta \á \Íslandi og drifkraftur \í
-              \íslenskri sk\ák.
+              Hlaðvarpið hefur orðið eitt vinsælasta á Íslandi og drifkraftur í
+              íslenskri skák.
             </p>
             <span className="inline-block bg-cad-electric/10 border border-cad-electric/30 px-4 py-2 rounded-lg text-cad-light text-xs tracking-widest">
-              TRAUST \· HEI\ÐARLEIKI \· GAGNS\ÆI
+              TRAUST · HEIÐARLEIKI · GAGNSÆI
             </span>
           </div>
         </div>
@@ -201,23 +201,23 @@ export default function ThattastjornendurContent({ displayCount }: { displayCoun
       {/* SECTION 4: CTA */}
       <section className="bg-cad-dark border-t border-white/[0.05] py-12 md:py-12 px-5 md:px-8 text-center">
         <p className="text-cad-light text-xs tracking-widest uppercase mb-3">
-          HLUSTA\ÐU
+          HLUSTAÐU
         </p>
         <h3 className="text-2xl font-medium text-white mb-6">
-          Tilb\úin a\ð hlusta?
+          Tilbúin að hlusta?
         </h3>
         <div className="flex flex-wrap justify-center gap-3">
           <Link
             href="/thaettir"
             className="bg-cad-electric hover:bg-cad-bright text-white rounded-lg px-6 py-3 text-sm font-medium transition-colors"
           >
-            N\ýjasti \þ\áttur
+            Nýjasti þáttur
           </Link>
           <Link
             href="/thaettir"
             className="border border-white/20 hover:border-white/40 text-white rounded-lg px-6 py-3 text-sm font-medium transition-colors"
           >
-            Allir \þ\ættir
+            Allir þættir
           </Link>
         </div>
       </section>
