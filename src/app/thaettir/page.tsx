@@ -33,9 +33,57 @@ function formatTime(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+function EpisodesPageSkeleton() {
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <section
+        className="px-8 pt-12 pb-6"
+        style={{
+          background: "radial-gradient(ellipse at top, rgba(0,79,254,0.12) 0%, #0a1428 70%)",
+        }}
+      >
+        <div className="max-w-6xl mx-auto">
+          <div className="h-3 w-24 bg-cad-mid/40 rounded animate-pulse mb-3" />
+          <div className="h-10 w-64 bg-cad-mid/40 rounded animate-pulse mb-2" />
+          <div className="h-4 w-48 bg-cad-mid/40 rounded animate-pulse" />
+        </div>
+      </section>
+
+      {/* Filter pills + search */}
+      <section className="px-8 pt-5 pb-8">
+        <div className="max-w-6xl mx-auto flex flex-wrap gap-4 items-center">
+          <div className="h-12 w-full max-w-[360px] bg-cad-mid/40 rounded-lg animate-pulse" />
+          <div className="flex gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-10 w-24 bg-cad-mid/40 rounded-full animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Episode card grid */}
+      <section className="px-8 pb-12">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <div key={i} className="rounded-[14px] overflow-hidden" style={{ background: "#0f1f3d", border: "0.5px solid rgba(255,255,255,0.06)" }}>
+              <div className="aspect-square bg-cad-mid/40 animate-pulse" />
+              <div className="p-4 space-y-3">
+                <div className="h-2.5 bg-cad-mid/40 rounded animate-pulse w-24" />
+                <div className="h-4 bg-cad-mid/40 rounded animate-pulse w-3/4" />
+                <div className="h-3 bg-cad-mid/40 rounded animate-pulse w-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function ThaettirPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<EpisodesPageSkeleton />}>
       <ThaettirContent />
     </Suspense>
   );
