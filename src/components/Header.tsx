@@ -33,10 +33,10 @@ function InstagramIcon({ size = 14 }: { size?: number }) {
 }
 
 const platformLinks = [
-  { href: "https://open.spotify.com", label: "Spotify", icon: Music },
-  { href: "https://podcasts.apple.com", label: "Apple Podcasts", icon: Headphones },
-  { href: "https://youtube.com", label: "YouTube", icon: YoutubeIcon },
-  { href: "https://instagram.com", label: "Instagram", icon: InstagramIcon },
+  { href: "https://open.spotify.com/show/1k1Ak6f8wFba3DzJzrNLTO", label: "Spotify", icon: Music },
+  { href: "https://podcasts.apple.com/is/podcast/chess-after-dark/id1592499624", label: "Apple Podcasts", icon: Headphones },
+  { href: "https://www.youtube.com/@chessafterdark7953", label: "YouTube", icon: YoutubeIcon },
+  { href: "https://www.instagram.com/chessafterdark/", label: "Instagram", icon: InstagramIcon },
 ];
 
 function Logo({ small = false }: { small?: boolean }) {
