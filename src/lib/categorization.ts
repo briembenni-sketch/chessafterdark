@@ -3,8 +3,8 @@
  *
  * Keywords are tuned for Icelandic + English mixed content. Edge cases
  * handled via `data/episode-overrides.json`. To override an episode's
- * classification, add `{ "<episodeTitle>": ["skak", "vidskipti"] }` to
- * that file.
+ * classification, add `{ "<episodeNumber>": ["skak", "vidskipti"] }` to
+ * that file (keyed by episode number, not title).
  */
 
 import overrides from "@/data/episode-overrides.json";
@@ -148,11 +148,15 @@ export function classifyEpisode(episode: {
   title: string;
   description: string;
   guests: string[];
+  episodeNumber?: number;
 }): Category[] {
-  // MANUAL OVERRIDE (by title) — loaded last, full override
-  const override = (overrides as unknown as Record<string, Category[]>)[episode.title];
-  if (override && Array.isArray(override) && override.length > 0) {
-    return override;
+  // MANUAL OVERRIDE (by episode number) — full override
+  if (episode.episodeNumber != null) {
+    const key = String(episode.episodeNumber);
+    const override = (overrides as unknown as Record<string, Category[]>)[key];
+    if (override && Array.isArray(override) && override.length > 0) {
+      return override;
+    }
   }
 
   const text = `${episode.title} ${episode.description}`.toLowerCase();

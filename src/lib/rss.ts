@@ -232,6 +232,7 @@ export async function fetchEpisodes(): Promise<Episode[]> {
         title: cleaned,
         description: desc,
         guests: guestInfo.allGuests,
+        episodeNumber: epNum,
       });
 
       return {
@@ -283,6 +284,7 @@ export async function fetchEpisodes(): Promise<Episode[]> {
         title: ep.title,
         description: ep.description,
         guests: ep.guests,
+        episodeNumber: ep.episodeNumber,
       });
       return {
         number: ep.episodeNumber,
