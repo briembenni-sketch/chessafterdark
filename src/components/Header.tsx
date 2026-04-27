@@ -59,7 +59,7 @@ function Logo({ small = false }: { small?: boolean }) {
   );
 }
 
-export default function Header() {
+export default function Header({ episodeCount }: { episodeCount?: number }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -314,8 +314,8 @@ export default function Header() {
                     >
                       <span className="flex items-center gap-3">
                         {link.label}
-                        {link.href === "/thaettir" && (
-                          <span className="text-white/30 text-xs">327</span>
+                        {link.href === "/thaettir" && episodeCount && (
+                          <span className="text-white/30 text-xs">{episodeCount}</span>
                         )}
                       </span>
                       {active && (

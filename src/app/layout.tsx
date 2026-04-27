@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { fetchEpisodes } from "@/lib/rss";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,15 +47,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const episodes = await fetchEpisodes();
+
   return (
     <html lang="is" className={`${geistSans.variable} antialiased`}>
       <body className="min-h-screen flex flex-col">
-        <Header />
+        <Header episodeCount={episodes.length} />
         <main id="main-content" className="flex-1 pt-16">{children}</main>
         <Footer />
       </body>

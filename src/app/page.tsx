@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { fetchEpisodes } from "@/lib/rss";
+import { fetchEpisodes, getDisplayCount } from "@/lib/rss";
 import { CATEGORIES, CATEGORY_ORDER, countByCategory } from "@/lib/categorization";
 import { Play, Calendar, Clock, ArrowRight, ChevronRight } from "lucide-react";
 import {
@@ -415,7 +415,7 @@ export default async function Home() {
             BYRJAÐU AÐ HLUSTA
           </div>
           <h3 className="text-4xl md:text-5xl font-medium mb-5 tracking-tight">
-            Yfir {episodes.length} þættir bíða þín
+            Yfir {getDisplayCount(episodes)}+ þættir bíða þín
           </h3>
           <p className="text-white/60 text-base mb-8 max-w-md mx-auto">
             Hlaðvarpssafnið er opið og frjálst. Byrjaðu að hlusta í dag.

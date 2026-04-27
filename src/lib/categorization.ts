@@ -24,6 +24,79 @@ export const CATEGORY_ORDER: Category[] = [
 ];
 
 /**
+ * Count chess-related mentions in text. Each regex match contributes 1.
+ * Used for frequency-based Skák classification (threshold: 5+).
+ */
+export function countChessMentions(text: string): number {
+  const patterns: RegExp[] = [
+    // Core word "skák" with Icelandic inflections
+    /\bskák(a|ar|ir|inn|ina|inu|arinn|arinnar|arinni|um|irnir|anna|við|fyrir|ariðar)?\b/gi,
+    /\bskákmað(ur|inn|inum|sins|menn|mennirnir|manna|mönnum)\b/gi,
+    /\bskákmeistar(i|inn|ar|arnir|a|ans)\b/gi,
+    /\bskákmót(s|i|ið|inu|um|in)?\b/gi,
+    /\bskákþing(s|i|ið|inu)?\b/gi,
+    /\bskáksamband(s|i|ið|inu)?\b/gi,
+    /\bskákskól(i|inn|ans|um)\b/gi,
+
+    // Compound words with skák- prefix
+    /\bskák-?[a-záéíóúýþæö]+\b/gi,
+
+    // Chess-specific terminology
+    /\bstórmeistar(i|inn|ar|arnir|a|ans|ann)\b/gi,
+    /\balþjóðameistar(i|inn|a|ans|ar)\b/gi,
+    /\bgrandmaster\b/gi,
+    /\b(fide|elo)\s+(stig|rating|titil)/gi,
+
+    // World-famous chess players
+    /\b(magnús\s+carlsen|magnus\s+carlsen)\b/gi,
+    /\bcarlsen\b/gi,
+    /\bkasparov\b/gi,
+    /\bbobby\s+fischer\b/gi,
+    /\b(nakamura|hikaru\s+nakamura)\b/gi,
+    /\bcaruana\b/gi,
+    /\bding\s+liren\b/gi,
+    /\bnepomniachtchi\b/gi,
+    /\b(viswanathan\s+anand|anand)\b/gi,
+    /\bkarpov\b/gi,
+    /\b(judit\s+polgár|polgár)\b/gi,
+
+    // Icelandic chess players (full names to avoid false positives)
+    /\bhannes\s+hlífar\b/gi,
+    /\bjóhann\s+hjartarson\b/gi,
+    /\bhelgi\s+ólafsson\b/gi,
+    /\bfriðrik\s+ólafsson\b/gi,
+    /\bhjörvar\s+steinn\b/gi,
+    /\bguðmundur\s+kjartansson\b/gi,
+    /\bbragi\s+þorfinnsson\b/gi,
+    /\bhéðinn\s+steingrímsson\b/gi,
+
+    // Chess events
+    /\bíslandsmót\s+í\s+skák\b/gi,
+    /\breykjavík\s+open\b/gi,
+    /\bheimsmeistaramót\s+í\s+skák\b/gi,
+    /\bólympíuleikar\s+í\s+skák\b/gi,
+    /\bkandídatamót\b/gi,
+
+    // Chess concepts
+    /\bendatafl\b/gi,
+    /\bmiðtafl\b/gi,
+    /\bbyrjun(?=\s+(með|á|gegn|í\s+skák))/gi,
+    /\bgambi(t|tinn|tar)?\b/gi,
+    /\bsikileyjar\s*vörn\b/gi,
+    /\bspænsk\s*vörn\b/gi,
+    /\bdrottningarbragð\b/gi,
+    /\bkóngsindversk\s*vörn\b/gi,
+  ];
+
+  let count = 0;
+  for (const pattern of patterns) {
+    const m = text.match(pattern);
+    if (m) count += m.length;
+  }
+  return count;
+}
+
+/**
  * Classify an episode into 1+ categories.
  * - Episode lands in every category whose keywords match title+description
  * - If no category matches any of the 4 main ones -> 'annad'
@@ -61,12 +134,8 @@ export function classifyEpisode(episode: {
     matches.push("politik");
   }
 
-  // SKAK
-  if (
-    /\bskák|skákmað|skákmeistar|stórmeistar|alþjóðameistar|\belo\b|grandmaster|\bfide\b|opnun|sikil|spænsk|drottningar|indversk|kóngsindversk|endatafl|taktík|gambi|carlsen|kasparov|fischer|nakamura|hikaru|caruana|ding liren|nepomnia|anand|karpov|íslandsmót í skák|reykjavík open|skákþing|skáksamband|skáksetur|skákskóli|skák-|skák\s/i.test(
-      text
-    )
-  ) {
+  // SKAK — frequency-based: 5+ chess-related mentions = chess is the subject
+  if (countChessMentions(text) >= 5) {
     matches.push("skak");
   }
 

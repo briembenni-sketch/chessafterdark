@@ -162,7 +162,7 @@ export default function HeroSection({
               custom={0.5}
             >
               {[
-                { value: `${episodeCount}+`, label: 'Þættir' },
+                { value: `${Math.floor(episodeCount / 10) * 10}+`, label: 'Þættir' },
                 { value: '2.5M+', label: 'Spilanir' },
                 { value: '1M+', label: 'Klukkutímar hlustaðir' },
               ].map((stat) => (

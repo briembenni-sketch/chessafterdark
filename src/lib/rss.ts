@@ -1,6 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import { episodes as fallbackEpisodes } from "@/data/episodes";
-import { classifyEpisode, type Category } from "@/lib/categorization";
+import { classifyEpisode, countChessMentions, type Category } from "@/lib/categorization";
 
 export interface Episode {
   number: number;
@@ -180,6 +180,10 @@ function formatDate(pubDate: string): string {
   return d.toISOString().split("T")[0];
 }
 
+export function getDisplayCount(episodes: Episode[]): number {
+  return Math.floor(episodes.length / 10) * 10;
+}
+
 export async function fetchEpisodes(): Promise<Episode[]> {
   try {
     const res = await fetch(RSS_URL, { next: { revalidate: 3600 } });
@@ -202,7 +206,7 @@ export async function fetchEpisodes(): Promise<Episode[]> {
     const channelImage = channel?.image?.url || "";
     const fallbackImage = channelItunesImage || channelImage || "/images/brand/cover-art.png";
 
-    return itemArray.map((item: Record<string, unknown>, idx: number) => {
+    const mapped = itemArray.map((item: Record<string, unknown>, idx: number) => {
       const title = String(item.title || "");
       const rawDesc = String(item.description || "");
       const desc = htmlToText(rawDesc);
@@ -253,8 +257,17 @@ export async function fetchEpisodes(): Promise<Episode[]> {
             : item.guid) || ""
         ),
       };
-    })
-    .sort((a, b) => b.number - a.number);
+    });
+
+    const skakEpisodes = mapped.filter(e => e.categories.includes("skak"));
+    console.log(`[categorization] Skák category: ${skakEpisodes.length} episodes`);
+    console.log(`[categorization] Skák titles:`);
+    skakEpisodes.forEach(e => {
+      const mentions = countChessMentions(`${e.title} ${e.description}`.toLowerCase());
+      console.log(`  - "${e.title}" (${mentions} chess mentions)`);
+    });
+
+    return mapped.sort((a, b) => b.number - a.number);
   } catch (err) {
     console.error("RSS fetch error, using fallback:", err);
     // Fall back to static data
