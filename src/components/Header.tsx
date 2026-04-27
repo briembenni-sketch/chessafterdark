@@ -10,7 +10,6 @@ import { Music, Headphones } from "lucide-react";
 const navLinks = [
   { href: "/", label: "Forsíða", exact: true },
   { href: "/thaettir", label: "Þættir" },
-  { href: "/vidburdir", label: "Viðburðir" },
   { href: "/thattastjornendur", label: "Þáttastjórnendur" },
   { href: "/samband", label: "Hafa samband", exact: true },
 ];

@@ -35,9 +35,6 @@ export default function Footer() {
               <Link href="/thattastjornendur" className="text-muted text-sm hover:text-cad-light transition-colors">
                 Þáttastjórnendur
               </Link>
-              <Link href="/vidburdir" className="text-muted text-sm hover:text-cad-light transition-colors">
-                Viðburðir
-              </Link>
             </nav>
           </div>
 
