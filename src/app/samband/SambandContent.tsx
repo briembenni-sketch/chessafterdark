@@ -129,7 +129,7 @@ export default function SambandContent() {
               Sendu okkur póst, við svörum innan sólarhrings.
             </p>
             <div
-              className="rounded-lg text-white text-base"
+              className="rounded-lg text-white text-sm sm:text-base overflow-hidden"
               style={{
                 background: 'rgba(255,255,255,0.04)',
                 border: '0.5px solid rgba(255,255,255,0.08)',
