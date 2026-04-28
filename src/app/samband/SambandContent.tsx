@@ -87,8 +87,9 @@ export default function SambandContent() {
             className="mx-auto leading-relaxed text-white/65"
             style={{ maxWidth: 520 }}
           >
-            Hvort sem þú ert með hugmynd að þætti, vilt koma í viðtal eða
-            bjóða styrk. Við hlökkum til að heyra frá þér.
+            Hvort sem þú ert með hugmynd að þætti, viðmælanda, spurningu
+            fyrir næsta gest eða vilt verða samstarfsaðili Chess After Dark.
+            Við hlökkum til að heyra frá þér.
           </p>
         </div>
       </section>
