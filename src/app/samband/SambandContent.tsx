@@ -26,20 +26,16 @@ const socialLinks = [
 
 const faqs = [
   {
-    q: 'Ég vil koma sem gestur í þáttinn',
-    a: 'Sendu okkur póst á chessafterdark@chessafterdark.is með stuttri kynningu á þér og hvað þig langar að ræða. Við reynum að svara innan sólarhrings og bókum oft gesti nokkrar vikur fram í tímann.',
+    q: 'Ég er með hugmynd að gesti',
+    a: 'Sendu okkur tillögu á chessafterdark@chessafterdark.is. Við erum alltaf opin fyrir góðum hugmyndum að viðmælendum.',
   },
   {
-    q: 'Ég vil styrkja þáttinn',
-    a: 'Við tökum fagnandi á móti styrktaraðilum. Sendu póst með upplýsingum um fyrirtæki þitt og þær tegundir af samstarfi sem vekja áhuga þinn, svo framleiðum við tillögu fyrir þig.',
+    q: 'Hvernig get ég orðið samstarfsaðili?',
+    a: 'Sendu okkur tölvupóst á chessafterdark@chessafterdark.is og við ræðum möguleika á samstarfi.',
   },
   {
     q: 'Ég hef hugmynd að umræðuefni',
     a: 'Allar góðar hugmyndir eru velkomnar. Sendu okkur línu með hugmyndinni þinni. Bestu þættir okkar hafa oft komið úr ábendingum frá hlustendum.',
-  },
-  {
-    q: 'Fjölmiðlafyrirspurnir',
-    a: 'Fyrir viðtöl, tilvitnanir eða myndaefni fyrir fjölmiðla, sendu póst á chessafterdark@chessafterdark.is og merktu hann "Fjölmiðlar" í efnislínu.',
   },
 ];
 
