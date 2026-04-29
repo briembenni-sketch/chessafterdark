@@ -1,6 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import { episodes as fallbackEpisodes } from "@/data/episodes";
 import { classifyEpisode, countByCategory, countChessMentions, type Category } from "@/lib/categorization";
+import { resolvePlatformLinks, type PlatformLinks } from "@/lib/platform-links";
 
 export interface Episode {
   number: number;
@@ -20,6 +21,7 @@ export interface Episode {
   topics: string[];
   categories: Category[];
   guid: string;
+  platformLinks?: PlatformLinks;
 }
 
 const RSS_URL = "https://feeds.buzzsprout.com/1814614.rss";
@@ -257,6 +259,7 @@ export async function fetchEpisodes(): Promise<Episode[]> {
             ? (item.guid as Record<string, unknown>)["#text"]
             : item.guid) || ""
         ),
+        platformLinks: undefined as PlatformLinks | undefined,
       };
     });
 
@@ -273,6 +276,20 @@ export async function fetchEpisodes(): Promise<Episode[]> {
       const mentions = countChessMentions(`${e.title} ${e.description}`.toLowerCase());
       console.log(`  - "${e.title}" (${mentions} chess mentions)`);
     });
+
+    // Resolve platform-specific direct links
+    const platformLinksMap = await resolvePlatformLinks(
+      mapped.map((ep) => ({
+        number: ep.number,
+        title: ep.title,
+        guid: ep.guid,
+        date: ep.date,
+      }))
+    );
+    for (const ep of mapped) {
+      const links = platformLinksMap.get(ep.guid);
+      if (links) ep.platformLinks = links;
+    }
 
     return mapped.sort((a, b) => b.number - a.number);
   } catch (err) {

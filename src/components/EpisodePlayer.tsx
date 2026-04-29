@@ -7,6 +7,11 @@ interface EpisodePlayerProps {
 }
 
 export default function EpisodePlayer({ episode }: EpisodePlayerProps) {
+  const spotifyLink = getSpotifyLink(episode);
+  const appleLink = getApplePodcastsLink(episode);
+  const youtubeLink = getYouTubeLink(episode);
+  const hasAnyLink = spotifyLink || appleLink || youtubeLink;
+
   return (
     <div className="space-y-4">
       {/* Native audio player */}
@@ -39,36 +44,44 @@ export default function EpisodePlayer({ episode }: EpisodePlayerProps) {
         </div>
       )}
 
-      {/* Listen elsewhere links */}
-      <div className="flex flex-wrap gap-3">
-        <a
-          href={getSpotifyLink(episode)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-4 py-2 rounded-lg transition-all text-sm"
-        >
-          <Music className="w-4 h-4" />
-          Spotify
-        </a>
-        <a
-          href={getApplePodcastsLink(episode)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-4 py-2 rounded-lg transition-all text-sm"
-        >
-          <Apple className="w-4 h-4" />
-          Apple Podcasts
-        </a>
-        <a
-          href={getYouTubeLink(episode)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-4 py-2 rounded-lg transition-all text-sm"
-        >
-          <MonitorPlay className="w-4 h-4" />
-          YouTube
-        </a>
-      </div>
+      {/* Listen elsewhere links — only shown when direct links are available */}
+      {hasAnyLink && (
+        <div className="flex flex-wrap gap-3">
+          {spotifyLink && (
+            <a
+              href={spotifyLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-4 py-2 rounded-lg transition-all text-sm"
+            >
+              <Music className="w-4 h-4" />
+              Spotify
+            </a>
+          )}
+          {appleLink && (
+            <a
+              href={appleLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-4 py-2 rounded-lg transition-all text-sm"
+            >
+              <Apple className="w-4 h-4" />
+              Apple Podcasts
+            </a>
+          )}
+          {youtubeLink && (
+            <a
+              href={youtubeLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-4 py-2 rounded-lg transition-all text-sm"
+            >
+              <MonitorPlay className="w-4 h-4" />
+              YouTube
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 }
