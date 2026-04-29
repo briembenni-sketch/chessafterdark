@@ -1,5 +1,6 @@
 import { Music, Apple, MonitorPlay } from "lucide-react";
 import type { Episode } from "@/lib/rss";
+import { getSpotifyLink, getApplePodcastsLink, getYouTubeLink } from "@/lib/episode-links";
 
 interface EpisodePlayerProps {
   episode: Episode;
@@ -41,7 +42,7 @@ export default function EpisodePlayer({ episode }: EpisodePlayerProps) {
       {/* Listen elsewhere links */}
       <div className="flex flex-wrap gap-3">
         <a
-          href="https://open.spotify.com/show/1k1Ak6f8wFba3DzJzrNLTO"
+          href={getSpotifyLink(episode)}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-4 py-2 rounded-lg transition-all text-sm"
@@ -50,7 +51,7 @@ export default function EpisodePlayer({ episode }: EpisodePlayerProps) {
           Spotify
         </a>
         <a
-          href="https://podcasts.apple.com/is/podcast/chess-after-dark/id1592499624"
+          href={getApplePodcastsLink(episode)}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-4 py-2 rounded-lg transition-all text-sm"
@@ -59,7 +60,7 @@ export default function EpisodePlayer({ episode }: EpisodePlayerProps) {
           Apple Podcasts
         </a>
         <a
-          href="https://www.youtube.com/@chessafterdark7953"
+          href={getYouTubeLink(episode)}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white px-4 py-2 rounded-lg transition-all text-sm"
