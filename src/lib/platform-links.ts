@@ -22,8 +22,7 @@ const APPLE_SHOW_ID = "1592499624";
 const APPLE_LOOKUP_URL = `https://itunes.apple.com/lookup?id=${APPLE_SHOW_ID}&entity=podcastEpisode&limit=200`;
 
 const SPOTIFY_SHOW_ID = "1k1Ak6f8wFba3DzJzrNLTO";
-const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
-const SPOTIFY_EPISODES_URL = `https://api.spotify.com/v1/shows/${SPOTIFY_SHOW_ID}/episodes`;
+const SPOTIFY_SHOW_URL = `https://open.spotify.com/show/${SPOTIFY_SHOW_ID}`;
 
 const CACHE_PATH = path.join(process.cwd(), "src", "data", "platform-links-cache.json");
 const OVERRIDES_PATH = path.join(process.cwd(), "src", "data", "episode-platform-links.json");
@@ -192,60 +191,64 @@ interface SpotifyEpisode {
   title: string;
 }
 
-async function fetchSpotifyToken(): Promise<string | null> {
-  const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return null;
-
-  try {
-    const res = await fetch(SPOTIFY_TOKEN_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
-      },
-      body: "grant_type=client_credentials",
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.access_token || null;
-  } catch {
-    return null;
-  }
-}
-
+/**
+ * Scrapes the Spotify show page HTML to extract episode IDs and names.
+ *
+ * Spotify's show page embeds an `initialState` blob (base64-encoded JSON)
+ * containing the first ~12 episodes. No credentials are needed.
+ *
+ * This is inherently limited to the most recent episodes. Older episodes
+ * are only available via manual overrides in episode-platform-links.json.
+ * Cached entries persist across builds, so over time new episodes accumulate.
+ */
 async function fetchSpotifyEpisodes(): Promise<SpotifyEpisode[]> {
-  const token = await fetchSpotifyToken();
-  if (!token) {
-    console.warn("[Platform Links] Spotify: no credentials, skipping");
+  try {
+    const res = await fetch(SPOTIFY_SHOW_URL, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
+    });
+    if (!res.ok) {
+      console.warn(`[Platform Links] Spotify show page returned ${res.status}`);
+      return [];
+    }
+
+    const html = await res.text();
+
+    // Extract the base64-encoded initialState from the page
+    const stateMatch = html.match(
+      /<script id="initialState"[^>]*>([^<]+)<\/script>/
+    );
+    if (!stateMatch) {
+      console.warn("[Platform Links] Spotify: no initialState found in HTML");
+      return [];
+    }
+
+    const decoded = Buffer.from(stateMatch[1], "base64").toString("utf-8");
+    const state = JSON.parse(decoded);
+
+    // Episodes are nested under the show entity's pages.items
+    const showEntity =
+      state?.entities?.items?.[`spotify:show:${SPOTIFY_SHOW_ID}`];
+    const pageItems = showEntity?.pages?.items || [];
+
+    const episodes: SpotifyEpisode[] = [];
+    for (const item of pageItems) {
+      const epData = item?.entity?.data;
+      if (!epData?.uri || !epData?.name) continue;
+      const id = String(epData.uri).replace("spotify:episode:", "");
+      episodes.push({ id, name: epData.name, title: epData.name });
+    }
+
+    console.log(
+      `[Platform Links] Spotify: scraped ${episodes.length} episodes from show page (no credentials needed)`
+    );
+    return episodes;
+  } catch (err) {
+    console.warn("[Platform Links] Spotify show page scrape failed:", err);
     return [];
   }
-
-  const episodes: SpotifyEpisode[] = [];
-  let nextUrl: string | null = `${SPOTIFY_EPISODES_URL}?limit=50&market=IS`;
-
-  try {
-    while (nextUrl) {
-      const res: Response = await fetch(nextUrl, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) break;
-
-      const data = await res.json();
-      for (const item of data.items || []) {
-        episodes.push({
-          id: item.id,
-          name: item.name,
-          title: item.name,
-        });
-      }
-      nextUrl = data.next || null;
-    }
-  } catch (err) {
-    console.warn("[Platform Links] Spotify fetch failed:", err);
-  }
-
-  return episodes;
 }
 
 export async function resolvePlatformLinks(
