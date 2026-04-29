@@ -38,7 +38,7 @@ function getHosts(displayCount: number) {
       label: "STJÓRNANDI 02",
       role: "STOFNANDI · ÞÁTTASTJÓRNANDI",
       image: "/images/hosts/leifur-blue.png",
-      bio: "Leifur stofnaði Chess After Dark með Birki árið 2019. Hugmyndin var upphaflega myndhlaðvarp þar sem gestir tefldu á meðan þeir svöruðu spurningum, enda ekki á allra manna færi að tefla meðan þeir eru spurðir spjörunum úr. Í dag starfar Leifur sem viðskiptastjóri hjá CreditInfo.",
+      bio: "Leifur er annar stofnenda Chess After Dark og þáttastjórnandi frá upphafi árið 2019.",
       stats: [
         { value: `${displayCount}+`, label: "þættir" },
         { value: "2019", label: "síðan" },
