@@ -23,7 +23,7 @@ const cardGradients = [
 ];
 
 export default async function Home() {
-  const episodes = await fetchEpisodes({ skipPlatformLinks: true });
+  const episodes = await fetchEpisodes();
   const latestEpisode = episodes[0];
   const recentEpisodes = episodes.slice(1, 7);
 
