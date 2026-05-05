@@ -277,18 +277,23 @@ export async function fetchEpisodes(): Promise<Episode[]> {
       console.log(`  - "${e.title}" (${mentions} chess mentions)`);
     });
 
-    // Resolve platform-specific direct links
-    const platformLinksMap = await resolvePlatformLinks(
-      mapped.map((ep) => ({
-        number: ep.number,
-        title: ep.title,
-        guid: ep.guid,
-        date: ep.date,
-      }))
-    );
-    for (const ep of mapped) {
-      const links = platformLinksMap.get(ep.guid);
-      if (links) ep.platformLinks = links;
+    // Resolve platform-specific direct links (non-blocking — failures must not
+    // cause the entire episode fetch to fall back to stale static data)
+    try {
+      const platformLinksMap = await resolvePlatformLinks(
+        mapped.map((ep) => ({
+          number: ep.number,
+          title: ep.title,
+          guid: ep.guid,
+          date: ep.date,
+        }))
+      );
+      for (const ep of mapped) {
+        const links = platformLinksMap.get(ep.guid);
+        if (links) ep.platformLinks = links;
+      }
+    } catch (platformErr) {
+      console.warn("[Platform Links] Resolution failed, continuing without links:", platformErr);
     }
 
     return mapped.sort((a, b) => b.number - a.number);

@@ -139,7 +139,7 @@ function isCacheFresh(entry: CacheEntry, episodeDate: string): boolean {
 
 async function fetchYouTubeVideos(): Promise<{ title: string; url: string }[]> {
   try {
-    const res = await fetch(YOUTUBE_RSS_URL);
+    const res = await fetch(YOUTUBE_RSS_URL, { next: { revalidate: 86400 } });
     if (!res.ok) return [];
 
     const xml = await res.text();
@@ -168,7 +168,7 @@ interface AppleEpisode {
 
 async function fetchAppleEpisodes(): Promise<AppleEpisode[]> {
   try {
-    const res = await fetch(APPLE_LOOKUP_URL);
+    const res = await fetch(APPLE_LOOKUP_URL, { next: { revalidate: 86400 } });
     if (!res.ok) return [];
 
     const data = await res.json();
@@ -204,6 +204,7 @@ interface SpotifyEpisode {
 async function fetchSpotifyEpisodes(): Promise<SpotifyEpisode[]> {
   try {
     const res = await fetch(SPOTIFY_SHOW_URL, {
+      next: { revalidate: 86400 },
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
