@@ -186,7 +186,7 @@ export function getDisplayCount(episodes: Episode[]): number {
   return Math.floor(episodes.length / 10) * 10;
 }
 
-export async function fetchEpisodes(): Promise<Episode[]> {
+export async function fetchEpisodes(options?: { skipPlatformLinks?: boolean }): Promise<Episode[]> {
   try {
     const res = await fetch(RSS_URL, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`RSS fetch failed: ${res.status}`);
@@ -279,21 +279,23 @@ export async function fetchEpisodes(): Promise<Episode[]> {
 
     // Resolve platform-specific direct links (non-blocking — failures must not
     // cause the entire episode fetch to fall back to stale static data)
-    try {
-      const platformLinksMap = await resolvePlatformLinks(
-        mapped.map((ep) => ({
-          number: ep.number,
-          title: ep.title,
-          guid: ep.guid,
-          date: ep.date,
-        }))
-      );
-      for (const ep of mapped) {
-        const links = platformLinksMap.get(ep.guid);
-        if (links) ep.platformLinks = links;
+    if (!options?.skipPlatformLinks) {
+      try {
+        const platformLinksMap = await resolvePlatformLinks(
+          mapped.map((ep) => ({
+            number: ep.number,
+            title: ep.title,
+            guid: ep.guid,
+            date: ep.date,
+          }))
+        );
+        for (const ep of mapped) {
+          const links = platformLinksMap.get(ep.guid);
+          if (links) ep.platformLinks = links;
+        }
+      } catch (platformErr) {
+        console.warn("[Platform Links] Resolution failed, continuing without links:", platformErr);
       }
-    } catch (platformErr) {
-      console.warn("[Platform Links] Resolution failed, continuing without links:", platformErr);
     }
 
     return mapped.sort((a, b) => b.number - a.number);
