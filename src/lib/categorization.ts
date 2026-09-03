@@ -55,7 +55,7 @@ export function countChessMentions(text: string): number {
     /\bstórmeistar(i|inn|ar|arnir|a|ans|ann)\b/gi,
     /\bstórmeistarar\b/gi,
     /\balþjóðameistar(i|inn|a|ans|ar)\b/gi,
-    /\balþjóðlegur meistari\b/gi,
+    /\balþjóðleg(ur|i|a)\s+meistar(i|inn|ann|a|ans)\b/gi,
     /\bgrandmaster\b/gi,
     /\b(fide|elo)\s+(stig|rating|titil)/gi,
 
@@ -126,8 +126,71 @@ export function countChessMentions(text: string): number {
 
 // ── Keyword regexes for non-chess categories ──
 
-const KNATTSPYRNA_RE =
-  /fótbolt|knattspyrn|\bksí\b|úrvalsdeild|pepsi[- ]deild|bestu deildin|meistaradeild|champions\s+league|premier\s+league|la liga|serie a|bundesliga|landslið(?!.*skák)|landsliðið|\beurocup\b|uefa|fifa|messi|ronaldo|haaland|mbappe|liverpool|arsenal|man\s+(city|utd|united)|manchester|chelsea|real\s+madrid|barcelona|bayern|psg|enska deildin|heimsmeistarakeppni(?!.*skák)|\bhm\b.*fótbolt|\bem\b.*fótbolt|markmaður|framherji|varnarmaður|þjálfari|markvörður|\bkr\b|valur|víkingur|\bfh\b|stjarnan|breiðablik/i;
+/**
+ * Icelandic-aware word boundary for short abbreviations.
+ *
+ * JavaScript's `\b` is ASCII-only, so an accented Icelandic letter counts as a
+ * *non-word* character. Two consequences bit us: `\bkr\b` matched the "kr"
+ * inside "krónan" — both the sponsor KRÓNAN listed in every recent episode and
+ * any discussion of the currency — which pulled ~30 episodes into Knattspyrna;
+ * and `\bksí\b` could never match a standalone "ksí" at all, so KSÍ went
+ * undetected. `autoTagTopics()` in lib/rss.ts already uses this same idiom.
+ */
+const ISL = "a-záéíóúýþæðö";
+const bounded = (token: string) => `(?<![${ISL}])${token}(?![${ISL}])`;
+
+const KNATTSPYRNA_RE = new RegExp(
+  [
+    "fótbolt",
+    "knattspyrn",
+    bounded("ksí"),
+    "úrvalsdeild",
+    "pepsi[- ]deild",
+    "bestu deildin",
+    "meistaradeild",
+    "champions\\s+league",
+    "premier\\s+league",
+    "la liga",
+    "serie a",
+    "bundesliga",
+    "landslið(?!.*skák)",
+    "landsliðið",
+    "\\beurocup\\b",
+    "uefa",
+    "fifa",
+    "messi",
+    "ronaldo",
+    "haaland",
+    "mbappe",
+    "liverpool",
+    "arsenal",
+    "man\\s+(city|utd|united)",
+    "manchester",
+    "chelsea",
+    "real\\s+madrid",
+    "barcelona",
+    "bayern",
+    "psg",
+    "enska deildin",
+    "heimsmeistarakeppni(?!.*skák)",
+    `${bounded("hm")}.*fótbolt`,
+    `${bounded("em")}.*fótbolt`,
+    "markmaður",
+    "framherji",
+    "varnarmaður",
+    // Bare "þjálfari" reads as football, but must not fire on unrelated
+    // compounds — einkaþjálfari (personal trainer), sjúkraþjálfari, etc.
+    "(?<!einka)(?<!sjúkra)(?<!styrktar)(?<!lífs)þjálfari",
+    "markvörður",
+    bounded("kr"),
+    "valur",
+    "víkingur",
+    bounded("fh"),
+    "stjarnan",
+    "breiðablik",
+  ].join("|"),
+  "i"
+);
 
 const POLITIK_RE =
   /stjórnm|ráðherra|forsætisráðherra|fjármálaráðherra|alþingi|forseti íslands|formaður.*flokks|sjálfstæðisfl|framsókn|samfylking|vinstri græn|\bvg\b|miðflokk|viðreisn|píratar|flokkur fólksins|sósíalist|kosning|þingkosning|forsetakosning|ríkisstj|stjórnarandstaða|þingmað|þingmenn|borgarstjór|bæjarstjór|utanríkismál|innanríkismál|efnahagsmál.*ríkis/i;

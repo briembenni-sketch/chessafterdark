@@ -172,5 +172,14 @@
   "324": ["politik"],
   "326": ["vidskipti"],
   "327": ["politik", "vidskipti"],
-  "328": ["vidskipti"]
+  "328": ["vidskipti"],
+  "330": ["politik", "annad"],
+  "332": ["politik"],
+  "333": ["vidskipti", "annad"],
+  "345": ["vidskipti"],
+  "347": ["politik", "annad"],
+  "348": ["politik"],
+  "349": ["annad"],
+  "355": ["politik", "vidskipti"],
+  "359": ["politik"]
 }
